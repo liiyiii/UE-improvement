@@ -1,0 +1,1651 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PDF 转换工具 - 将您的 PDF 转换为可编辑的 Word 文档</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <style>
+        /* Custom CSS for animations */
+        @keyframes fade-in-down {
+            from {
+                opacity: 0;
+                transform: translateY(-20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @keyframes slide-in-up {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+         @keyframes float {
+            0% { transform: translateY(0); }
+            50% { transform: translateY(-10px); }
+            100% { transform: translateY(0); }
+        }
+
+        @keyframes pulse-subtle {
+            0%, 100% { opacity: 0.3; }
+            50% { opacity: 0.4; }
+        }
+
+         @keyframes bounce-horizontal {
+            0%, 100% { transform: translateX(0); }
+            50% { transform: translateX(10px); }
+        }
+
+
+        .animate-fade-in-down {
+            animation: fade-in-down 0.5s ease-out forwards;
+        }
+
+        .animate-slide-in-up {
+            animation: slide-in-up 0.5s ease-out forwards;
+        }
+
+         .animate-float {
+            animation: float 3s ease-in-out infinite;
+        }
+
+         .animate-pulse-subtle {
+             animation: pulse-subtle 4s ease-in-out infinite;
+         }
+
+         .animate-bounce-horizontal {
+             animation: bounce-horizontal 1s infinite;
+         }
+
+
+        /* Basic styling for dropzone hover */
+        .dropzone.hover {
+            border-color: #a78bfa; /* purple-400 */
+            background-color: #1f2937; /* gray-800 */
+        }
+
+        /* Hide elements based on status */
+        .hidden {
+            display: none;
+        }
+
+        /* Custom styles for hero section background image */
+        .hero-background {
+            background-image: url('/image_a786a6.png/Users/liyi/Desktop/未命名文件夹 3/20250522_0740_PDF to Word Transformation_simple_compose_01jvtkda7kenhrz3htjqwq2tg4.png'); /* Updated to absolute path */
+            background-size: cover; /* Cover the entire section */
+            background-position: center; /* Center the image */
+            background-repeat: no-repeat; /* Do not repeat the image */
+            position: relative;
+            overflow: hidden;
+        }
+
+        /* Overlay to make text more readable on the background image */
+        .hero-background::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.5); /* Dark overlay */
+            z-index: 0; /* Ensure overlay is behind text but above background image */
+        }
+
+        /* Ensure content is above the overlay */
+        .hero-background .container {
+            position: relative;
+            z-index: 1;
+        }
+
+        /* Modal specific styles */
+        .custom-scrollbar::-webkit-scrollbar {
+            width: 8px;
+        }
+
+        .custom-scrollbar::-webkit-scrollbar-track {
+            background: #374151; /* gray-700 */
+            border-radius: 10px;
+        }
+
+        .custom-scrollbar::-webkit-scrollbar-thumb {
+            background: #8b5cf6; /* purple-500 */
+            border-radius: 10px;
+        }
+
+        .custom-scrollbar::-webkit-scrollbar-thumb:hover {
+            background: #7c3aed; /* purple-600 */
+        }
+    </style>
+</head>
+<body class="min-h-screen bg-gray-950 text-gray-200 font-sans overflow-x-hidden">
+
+    <header class="bg-gray-900 shadow-lg sticky top-0 z-50 animate-fade-in-down">
+        <div class="container mx-auto px-4 py-4 flex justify-between items-center">
+            <div class="text-2xl font-bold text-purple-400" id="logo">PDF Converter</div>
+            <nav class="hidden md:flex space-x-6">
+                <a href="#digital-converter" class="text-gray-300 hover:text-purple-400 transition-colors duration-300" id="nav-digital">Digital PDF</a>
+                <a href="#image-converter" class="text-gray-300 hover:text-purple-400 transition-colors duration-300" id="nav-image">Image PDF (OCR)</a>
+                <a href="#showcase" class="text-gray-300 hover:text-purple-400 transition-colors duration-300" id="nav-showcase">Examples</a>
+                <a href="#pricing" class="text-gray-300 hover:text-purple-400 transition-colors duration-300" id="nav-pricing">Pricing</a>
+                <a href="#about" class="text-gray-300 hover:text-purple-400 transition-colors duration-300" id="nav-about">About Us</a>
+            </nav>
+            <div class="flex items-center space-x-4">
+                <button class="text-gray-300 hover:text-purple-400 transition-colors duration-300" id="login-btn">Login</button>
+                <button class="bg-purple-600 text-white px-4 py-2 rounded-md hover:bg-purple-700 transition-colors duration-300 shadow-md" id="register-btn">Sign Up</button>
+                <select class="ml-4 p-2 border border-gray-700 rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500 transition-colors duration-300 bg-gray-800 text-gray-200" id="language-select">
+                    <option value="zh">中文</option>
+                    <option value="en">English</option>
+                </select>
+            </div>
+        </div>
+    </header>
+
+    <section class="hero-background text-white py-24 text-center">
+        <div class="container mx-auto px-4 relative z-10">
+            <p class="text-3xl md:text-5xl text-purple-300 mb-4 animate-slide-in-up delay-100 font-extrabold" id="hero-main-message">
+                </p>
+            <h1 class="text-xl md:text-2xl font-extrabold mb-10 animate-slide-in-up text-purple-200" id="hero-secondary-message">
+                </h1>
+            <div class="flex flex-col md:flex-row justify-center space-y-4 md:space-y-0 md:space-x-6 animate-slide-in-up delay-200">
+                <button class="bg-white text-purple-700 px-8 py-3 rounded-full text-lg font-semibold hover:bg-gray-200 transition-all duration-300 shadow-lg transform hover:scale-105" id="hero-digital-btn">Convert Digital PDF</button>
+                <button class="bg-white text-indigo-700 px-8 py-3 rounded-full text-lg font-semibold hover:bg-gray-200 transition-all duration-300 shadow-lg transform hover:scale-105" id="hero-image-btn">Convert Image PDF (OCR)</button>
+            </div>
+             <input type="file" id="file-input" class="hidden" accept="application/pdf">
+        </div>
+    </section>
+
+    <section id="digital-converter" class="py-20 bg-gray-900">
+        <div class="container mx-auto px-4">
+            <h2 class="text-3xl md:text-4xl font-bold text-center mb-8 text-gray-100" id="digital-converter-title">Digital PDF to Word Conversion</h2>
+            <p class="text-xl text-gray-300 text-center mb-16 max-w-3xl mx-auto" id="digital-converter-subtitle">Convert born-digital PDFs with flawless accuracy and speed.</p>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-12 mb-20">
+                <div class="flex flex-col items-center text-center p-6 bg-gray-800 rounded-xl shadow-lg border border-gray-700">
+                     <svg xmlns="http://www.w3.org/2000/svg" width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-file-text text-purple-400 mb-4"><path d="M15 2H8a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h8a2 2 0 0 0 2-2V7Z"/><path d="M14 2v4a2 2 0 0 0 2 2h4"/><path d="M10 9H8"/><path d="M16 13H8"/><path d="M16 17H8"/></svg>
+                    <h3 class="text-xl font-semibold mb-2 text-gray-100" id="digital-feature1-title">Pixel-Perfect Text & Formatting</h3>
+                    <p class="text-gray-300" id="digital-feature1-desc">Maintains original text formatting, fonts, and styles without loss.</p>
+                </div>
+                <div class="flex flex-col items-center text-center p-6 bg-gray-800 rounded-xl shadow-lg border border-gray-700">
+                     <svg xmlns="http://www.w3.org/2000/svg" width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-code text-orange-400 mb-4"><polyline points="16 18 22 12 16 6"/><polyline points="8 6 2 12 8 18"/></svg>
+                    <h3 class="text-xl font-semibold mb-2 text-gray-100" id="digital-feature4-title">Hyperlinks & Bookmarks</h3>
+                    <p class="text-gray-300" id="digital-feature4-desc">Preserves interactive elements like links and internal document bookmarks.</p>
+                </div>
+                <div class="flex flex-col items-center text-center p-6 bg-gray-800 rounded-xl shadow-lg border border-gray-700">
+                     <svg xmlns="http://www.w3.org/2000/svg" width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-layers text-yellow-400 mb-4"><path d="m12.83 2.18a2 2 0 0 0-1.66 0L2.6 6.08a1 1 0 0 0 0 1.83l8.58 3.91a2 2 0 0 0 1.66 0l8.58-3.9a1 1 0 0 0 0-1.83Z"/><path d="m22 17.65-9.17 4.17a2 2 0 0 1-1.66 0L2 17.65"/><path d="m22 12.65-9.17 4.17a2 2 0 0 1-1.66 0L2 12.65"/></svg>
+                    <h3 class="text-xl font-semibold mb-2 text-gray-100" id="digital-feature3-title">Complex Layouts Handled</h3>
+                    <p class="text-gray-300" id="digital-feature3-desc">Handles multi-column layouts, headers, footers, and intricate structures effortlessly.</p>
+                </div>
+                <div class="flex flex-col items-center text-center p-6 bg-gray-800 rounded-xl shadow-lg border border-gray-700">
+                     <svg xmlns="http://www.w3.org/2000/svg" width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-zap text-teal-400 mb-4"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
+                    <h3 class="text-xl font-semibold mb-2 text-gray-100" id="digital-feature2-title">Accurate Vector Graphics</h3>
+                    <p class="text-gray-300" id="digital-feature2-desc">Accurately converts vector elements for crisp, scalable graphics.</p>
+                </div>
+            </div>
+
+            <div id="digital-dropzone" class="dropzone border-2 border-dashed border-gray-700 rounded-xl p-16 text-center cursor-pointer transition-all duration-300 ease-in-out transform hover:-translate-y-1 hover:shadow-xl">
+                 <svg xmlns="http://www.w3.org/2000/svg" width="80" height="80" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-file-digit mx-auto text-purple-500 mb-4 animate-float"><line x1="9" x2="9" y1="12" y2="18"/><line x1="15" x2="15" y1="6" y2="18"/><path d="M12 12a4 4 0 0 0-4 4v2a2 2 0 0 0 2 2h4a2 2 0 0 0 2-2v-2a4 4 0 0 0-4-4Z"/><path d="M4 22h16a2 2 0 0 0 2-2V8L14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2Z"/><path d="M14 2v6h6"/></svg>
+                <p class="text-gray-300 text-lg" id="digital-dropzone-text">Drag & drop your PDF file here</p>
+                <p class="text-gray-400 text-sm mt-1" id="digital-dropzone-subtext">or click to browse</p>
+                <p class="mt-4 text-purple-400 font-semibold text-xl" id="digital-selected-file"></p>
+            </div>
+
+            <div id="digital-conversion-area" class="mt-12 flex flex-col md:flex-row items-center justify-center space-y-6 md:space-y-0 md:space-x-10 hidden">
+                <button id="digital-convert-btn" class="btn bg-gradient-to-r from-purple-600 to-indigo-700 text-white px-10 py-4 rounded-lg text-xl font-semibold hover:from-purple-700 hover:to-indigo-800 transition-all duration-300 shadow-lg flex items-center justify-center transform hover:scale-105">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-loader-2 animate-spin mr-3 w-6 h-6 hidden" id="digital-loading-spinner"></svg>
+                    <span id="digital-convert-btn-text">Convert</span>
+                </button>
+                <button id="digital-download-converted-btn" class="btn bg-green-600 text-white px-8 py-3 rounded-lg text-lg font-semibold hover:bg-green-700 transition-colors duration-300 shadow-lg flex items-center justify-center transform hover:scale-105 hidden">
+                     <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-arrow-down-to-line mr-3 w-6 h-6"><path d="M12 17V3"/><path d="m6 11 6 6 6-6"/><path d="M19 21H5"/></svg>
+                     <span id="digital-download-converted-btn-text">Download Converted File</span>
+                 </button>
+                 <button id="digital-edit-online-btn" class="btn bg-blue-600 text-white px-8 py-3 rounded-lg text-lg font-semibold hover:bg-blue-700 transition-colors duration-300 shadow-lg flex items-center justify-center transform hover:scale-105 hidden">
+                     <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-edit mr-3 w-6 h-6"><path d="M4 13.5V4a2 2 0 0 1 2-2h8.5L20 7.5V20a2 2 0 0 1-2 2h-5.5"/><polyline points="14 2 14 8 20 8"/><path d="M10.42 12.67a.7.7 0 0 0-.12.1l-.3.95a1 1 0 0 1-.9.66h-4.47a1 1 0 0 1-.9-.66l-.3-.95a.7.7 0 0 0-.12-.1L2.17 9.53a1 1 0 0 1 0-1.41l1.41-1.41a.7.7 0 0 0 .1-.12L9.53 2.17a1 1 0 0 1 1.41 0l1.41 1.41a.7.7 0 0 0 .12.12l1.95 1.95a.7.7 0 0 0 .1.12l.95.3a1 1 0 0 1 .66.9v4.47a1 1 0 0 1-.66.9l-.95.3a.7.7 0 0 0-.12.1Z"/></svg>
+                     <span id="digital-edit-online-btn-text">Edit Online</span>
+                 </button>
+                 <button id="digital-summarize-btn" class="btn bg-purple-500 text-white px-8 py-3 rounded-lg text-lg font-semibold hover:bg-purple-600 transition-colors duration-300 shadow-lg flex items-center justify-center transform hover:scale-105 hidden">
+                     <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-sparkles mr-3 w-6 h-6"><path d="M9.9 10.8c.32-.32.55-.74.65-1.2A.77.77 0 0 0 10.5 8a.77.77 0 0 0-.9-.65c-.46.1-.88.33-1.2.65-.32.32-.55.74-.65 1.2a.77.77 0 0 0 .1 1.55c.46-.1.88-.33 1.2-.65Z"/><path d="M18.5 19.5c-.32.32-.74.55-1.2.65a.77.77 0 0 1-1.55-.1c.1-.46.33-.88.65-1.2.32-.32.74-.55 1.2-.65a.77.77 0 0 1 1.55.1c-.1.46-.33.88-.65 1.2Z"/><path d="M12.5 12.5c-.32.32-.74.55-1.2.65a.77.77 0 0 1-1.55-.1c.1-.46.33-.88.65-1.2.32-.32.74-.55 1.2-.65a.77.77 0 0 1 1.55.1c-.1.46-.33.88-.65 1.2Z"/><path d="M12.5 5.5c-.32.32-.74.55-1.2.65a.77.77 0 0 1-1.55-.1c.1-.46.33-.88.65-1.2.32-.32.74-.55 1.2-.65a.77.77 0 0 1 1.55.1c-.1.46-.33.88-.65 1.2Z"/><path d="M5.5 12.5c-.32.32-.74.55-1.2.65a.77.77 0 0 1-1.55-.1c.1-.46.33-.88.65-1.2.32-.32.74-.55 1.2-.65a.77.77 0 0 1 1.55.1c-.1.46-.33.88-.65 1.2Z"/></svg>
+                     <span id="digital-summarize-btn-text">Summarize Document ✨</span>
+                 </button>
+            </div>
+
+            <div id="digital-progress-bar-container" class="w-full max-w-xl mx-auto mt-12 bg-gray-700 rounded-full h-3 overflow-hidden hidden">
+                <div id="digital-progress-bar" class="bg-purple-500 h-full rounded-full transition-all duration-300 ease-in-out" style="width: 0%;"></div>
+            </div>
+
+            <p id="digital-status-message" class="text-center mt-6 text-xl font-medium text-gray-300"></p>
+        </div>
+    </section>
+
+    <section id="image-converter" class="py-20 bg-gray-800">
+        <div class="container mx-auto px-4">
+            <h2 class="text-3xl md:text-4xl font-bold text-center mb-8 text-gray-100" id="image-converter-title">Image PDF to Word Conversion (OCR)</h2>
+            <p class="text-xl text-gray-300 text-center mb-16 max-w-3xl mx-auto" id="image-converter-subtitle">Unlock scanned documents and make them editable using advanced OCR.</p>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-12 mb-20">
+                <div class="flex flex-col items-center text-center p-6 bg-gray-700 rounded-xl shadow-lg border border-gray-600">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-cpu text-orange-400 mb-4"><rect x="4" y="4" width="16" height="16" rx="2"/><rect x="9" y="9" width="6" height="6"/><path d="M15 2v2"/><path d="M15 20v2"/><path d="M9 2v2"/><path d="M9 20v2"/><path d="M2 9h2"/><path d="M20 9h2"/><path d="M2 15h2"/><path d="M20 15h2"/></svg>
+                    <h3 class="text-xl font-semibold mb-2 text-gray-100" id="image-feature1-title">Advanced AI-Powered OCR</h3>
+                    <p class="text-gray-300" id="image-feature1-desc">Industry-leading accuracy for recognizing text in scanned images.</p>
+                </div>
+                <div class="flex flex-col items-center text-center p-6 bg-gray-700 rounded-xl shadow-lg border border-gray-600">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-table text-yellow-400 mb-4"><path d="M12 3v18"/><rect width="18" height="18" x="3" y="3" rx="2"/><path d="M3 9h18"/><path d="M3 15h18"/></svg>
+                    <h3 class="text-xl font-semibold mb-2 text-gray-100" id="image-feature2-title">Intelligent Table & Image Handling</h3>
+                    <p class="text-gray-300" id="image-feature2-desc">Identifies and reconstructs tables and integrates images seamlessly.</p>
+                </div>
+                <div class="flex flex-col items-center text-center p-6 bg-gray-700 rounded-xl shadow-lg border border-gray-600">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-globe text-teal-400 mb-4"><circle cx="12" cy="12" r="10"/><path d="M12 2a14.5 14.5 0 0 0 0 20 14.5 14.5 0 0 0 0-20"/><path d="M2 12h20"/></svg>
+                    <h3 class="text-xl font-semibold mb-2 text-gray-100" id="image-feature3-title">Broad Language Support</h3>
+                    <p class="text-gray-300" id="image-feature3-desc">Recognizes text in over 100 languages.</p>
+                </div>
+                <div class="flex flex-col items-center text-center p-6 bg-gray-700 rounded-xl shadow-lg border border-gray-600">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-eye text-purple-400 mb-4"><path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7Z"/><circle cx="12" cy="12" r="3"/></svg>
+                    <h3 class="text-xl font-semibold mb-2 text-gray-100" id="image-feature4-title">Noise Reduction & Enhancement</h3>
+                    <p class="text-gray-300" id="image-feature4-desc">Cleans up scanned images for better recognition results.</p>
+                </div>
+            </div>
+
+            <div id="image-dropzone" class="dropzone border-2 border-dashed border-gray-700 rounded-xl p-16 text-center cursor-pointer transition-all duration-300 ease-in-out transform hover:-translate-y-1 hover:shadow-xl">
+                 <svg xmlns="http://www.w3.org/2000/svg" width="80" height="80" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-scan-text mx-auto text-purple-500 mb-4 animate-float"><path d="M3 7V5a2 2 0 0 1 2-2h2"/><path d="M17 3h2a2 2 0 0 1 2 2v2"/><path d="M21 17v2a2 2 0 0 1-2 2h-2"/><path d="M7 21H5a2 2 0 0 1-2-2v-2"/><path d="M7 12h10"/><path d="M12 17v-5"/></svg>
+                <p class="text-gray-300 text-lg" id="image-dropzone-text">Drag & drop your PDF file here</p>
+                <p class="text-gray-400 text-sm mt-1" id="image-dropzone-subtext">or click to browse</p>
+                <p class="mt-4 text-purple-400 font-semibold text-xl" id="image-selected-file"></p>
+            </div>
+
+            <div id="image-conversion-area" class="mt-12 flex flex-col md:flex-row items-center justify-center space-y-6 md:space-y-0 md:space-x-10 hidden">
+                <button id="image-convert-btn" class="btn bg-gradient-to-r from-purple-600 to-indigo-700 text-white px-10 py-4 rounded-lg text-xl font-semibold hover:from-purple-700 hover:to-indigo-800 transition-all duration-300 shadow-lg flex items-center justify-center transform hover:scale-105">
+                     <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-loader-2 animate-spin mr-3 w-6 h-6 hidden" id="image-loading-spinner"></svg>
+                    <span id="image-convert-btn-text">Convert</span>
+                </button>
+                 <button id="image-download-converted-btn" class="btn bg-green-600 text-white px-8 py-3 rounded-lg text-lg font-semibold hover:bg-green-700 transition-colors duration-300 shadow-lg flex items-center justify-center transform hover:scale-105 hidden">
+                     <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-arrow-down-to-line mr-3 w-6 h-6"><path d="M12 17V3"/><path d="m6 11 6 6 6-6"/><path d="M19 21H5"/></svg>
+                     <span id="image-download-converted-btn-text">Download Converted File</span>
+                 </button>
+                 <button id="image-edit-online-btn" class="btn bg-blue-600 text-white px-8 py-3 rounded-lg text-lg font-semibold hover:bg-blue-700 transition-colors duration-300 shadow-lg flex items-center justify-center transform hover:scale-105 hidden">
+                     <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-edit mr-3 w-6 h-6"><path d="M4 13.5V4a2 2 0 0 1 2-2h8.5L20 7.5V20a2 2 0 0 1-2 2h-5.5"/><polyline points="14 2 14 8 20 8"/><path d="M10.42 12.67a.7.7 0 0 0-.12.1l-.3.95a1 1 0 0 1-.9.66h-4.47a1 1 0 0 1-.9-.66l-.3-.95a.7.7 0 0 0-.12-.1L2.17 9.53a1 1 0 0 1 0-1.41l1.41-1.41a.7.7 0 0 0 .1-.12L9.53 2.17a1 1 0 0 1 1.41 0l1.41 1.41a.7.7 0 0 0 .12.12l1.95 1.95a.7.7 0 0 0 .1.12l.95.3a1 1 0 0 1 .66.9v4.47a1 1 0 0 1-.66.9l-.95.3a.7.7 0 0 0-.12.1Z"/></svg>
+                     <span id="image-edit-online-btn-text">Edit Online</span>
+                 </button>
+                 <button id="image-summarize-btn" class="btn bg-purple-500 text-white px-8 py-3 rounded-lg text-lg font-semibold hover:bg-purple-600 transition-colors duration-300 shadow-lg flex items-center justify-center transform hover:scale-105 hidden">
+                     <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-sparkles mr-3 w-6 h-6"><path d="M9.9 10.8c.32-.32.55-.74.65-1.2A.77.77 0 0 0 10.5 8a.77.77 0 0 0-.9-.65c-.46.1-.88.33-1.2.65-.32.32-.55.74-.65 1.2a.77.77 0 0 0 .1 1.55c.46-.1.88-.33 1.2-.65Z"/><path d="M18.5 19.5c-.32.32-.74.55-1.2.65a.77.77 0 0 1-1.55-.1c.1-.46.33-.88.65-1.2.32-.32.74-.55 1.2-.65a.77.77 0 0 1 1.55.1c-.1.46-.33.88-.65 1.2Z"/><path d="M12.5 12.5c-.32.32-.74.55-1.2.65a.77.77 0 0 1-1.55-.1c.1-.46.33-.88.65-1.2.32-.32.74-.55 1.2-.65a.77.77 0 0 1 1.55.1c-.1.46-.33.88-.65 1.2Z"/><path d="M12.5 5.5c-.32.32-.74.55-1.2.65a.77.77 0 0 1-1.55-.1c.1-.46.33-.88.65-1.2.32-.32.74-.55 1.2-.65a.77.77 0 0 1 1.55.1c-.1.46-.33.88-.65 1.2Z"/><path d="M5.5 12.5c-.32.32-.74.55-1.2.65a.77.77 0 0 1-1.55-.1c.1-.46.33-.88.65-1.2.32-.32.74-.55 1.2-.65a.77.77 0 0 1 1.55.1c-.1.46-.33.88-.65 1.2Z"/></svg>
+                     <span id="digital-summarize-btn-text">Summarize Document ✨</span>
+                 </button>
+            </div>
+
+            <div id="digital-progress-bar-container" class="w-full max-w-xl mx-auto mt-12 bg-gray-700 rounded-full h-3 overflow-hidden hidden">
+                <div id="digital-progress-bar" class="bg-purple-500 h-full rounded-full transition-all duration-300 ease-in-out" style="width: 0%;"></div>
+            </div>
+
+            <p id="digital-status-message" class="text-center mt-6 text-xl font-medium text-gray-300"></p>
+        </div>
+    </section>
+
+
+    <section id="showcase" class="py-20 bg-gray-900">
+        <div class="container mx-auto px-4">
+            <h2 class="text-3xl md:text-4xl font-bold text-center mb-8 text-gray-100" id="showcase-title">See the Quality: Before & After</h2>
+            <p class="text-xl text-gray-300 text-center mb-16 max-w-3xl mx-auto" id="showcase-subtitle">Experience the accuracy of our conversion with real-world examples.</p>
+
+            <div class="mb-20">
+                 <h3 class="text-2xl font-bold text-center mb-10 text-gray-100" id="showcase-digital-title">Digital PDF Example</h3>
+                 <div class="flex flex-col md:flex-row items-center justify-center space-y-8 md:space-y-0 md:space-x-12">
+                     <div class="w-64 h-80 bg-gray-800 rounded-lg shadow-lg flex items-center justify-center text-gray-400 text-sm mb-4 border border-gray-700">
+                         <img src="https://placehold.co/256x320/374151/9CA3AF?text=Original+Digital+PDF" alt="Original Digital PDF" class="w-full h-full object-cover rounded-lg">
+                     </div>
+                     <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-arrow-right text-purple-500 flex-shrink-0 animate-bounce-horizontal"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></svg>
+                     <div class="w-64 h-80 bg-gray-800 rounded-lg shadow-lg flex items-center justify-center text-gray-400 text-sm mb-4 border border-gray-700">
+                         <img src="https://placehold.co/256x320/374151/9CA3AF?text=Converted+Digital+Word" alt="Converted Digital Word Document" class="w-full h-full object-cover rounded-lg">
+                     </div>
+                 </div>
+                 <p class="text-gray-300 font-semibold mt-4 text-center" id="showcase-original-digital">Original PDF</p>
+                 <p class="text-gray-300 font-semibold mt-2 text-center" id="showcase-converted-digital">Converted Word Document</p>
+            </div>
+
+             <div>
+                 <h3 class="text-2xl font-bold text-center mb-10 text-gray-100" id="showcase-image-title">Image PDF (OCR) Example</h3>
+                 <div class="flex flex-col md:flex-row items-center justify-center space-y-8 md:space-y-0 md:space-x-12">
+                     <div class="w-64 h-80 bg-gray-800 rounded-lg shadow-lg flex items-center justify-center text-gray-400 text-sm mb-4 border border-gray-700">
+                         <img src="https://placehold.co/256x320/374151/9CA3AF?text=Original+Image+PDF" alt="Original Image PDF" class="w-full h-full object-cover rounded-lg">
+                     </div>
+                     <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-arrow-right text-orange-500 flex-shrink-0 animate-bounce-horizontal"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></svg>
+                     <div class="w-64 h-80 bg-gray-800 rounded-lg shadow-lg border border-gray-700 flex items-center justify-center text-gray-400 text-sm mb-4">
+                         <img src="https://placehold.co/256x320/374151/9CA3AF?text=Converted+Image+Word" alt="Converted Image Word Document" class="w-full h-full object-cover rounded-lg">
+                     </div>
+                 </div>
+                 <p class="text-gray-300 font-semibold mt-4 text-center" id="showcase-original-image">Original PDF</p>
+                 <p class="text-gray-300 font-semibold mt-2 text-center" id="showcase-converted-image">Converted Word Document</p>
+             </div>
+        </div>
+    </section>
+
+
+    <section id="editing" class="py-20 bg-gray-900">
+         <div class="container mx-auto px-4">
+             <h2 class="text-3xl md:text-4xl font-bold text-center mb-16 text-gray-100" id="editing-section-title">Online Editor (Preview)</h2>
+             <div class="bg-gray-800 rounded-xl shadow-lg p-8 border border-gray-700">
+                 <canvas id="editing-canvas" class="w-full border border-gray-700 rounded-md bg-gray-800" width="1000" height="600">
+                     Upload and convert a PDF to use the online editor.
+                 </canvas>
+                 <div class="mt-6 text-center text-gray-400 text-lg">
+                     <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-edit inline-block mr-2 w-6 h-6 align-middle"><path d="M4 13.5V4a2 2 0 0 1 2-2h8.5L20 7.5V20a2 2 0 0 1-2 2h-5.5"/><polyline points="14 2 14 8 20 8"/><path d="M10.42 12.67a.7.7 0 0 0-.12.1l-.3.95a1 1 0 0 1-.9.66h-4.47a1 1 0 0 1-.9-.66l-.3-.95a.7.7 0 0 0-.12-.1L2.17 9.53a1 1 0 0 1 0-1.41l1.41-1.41a.7.7 0 0 0 .1-.12L9.53 2.17a1 1 0 0 1 1.41 0l1.41 1.41a.7.7 0 0 0 .12.12l1.95 1.95a.7.7 0 0 0 .1.12l.95.3a1 1 0 0 1 .66.9v4.47a1 1 0 0 1-.66.9l-.95.3a.7.7 0 0 0-.12.1Z"/></svg>
+                     <span id="editing-placeholder-text">Upload and convert a PDF to use the online editor.</span>
+                 </div>
+                  <div id="download-edited-container" class="text-center mt-10 hidden">
+                      <button id="download-edited-btn" class="btn bg-green-600 text-white px-10 py-4 rounded-lg text-xl font-semibold hover:bg-green-700 transition-colors duration-300 shadow-lg flex items-center justify-center mx-auto transform hover:scale-105">
+                          <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-download mr-3 w-6 h-6"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" x2="12" y1="15" y2="3"/></svg>
+                          <span id="download-edited-btn-text">Download Edited Document</span>
+                      </button>
+                 </div>
+             </div>
+         </div>
+     </section>
+
+
+    <section id="pricing" class="py-20 bg-gray-800">
+        <div class="container mx-auto px-4">
+            <h2 class="text-3xl md:text-4xl font-bold text-center mb-8 text-gray-100" id="pricing-title">Flexible Pricing for Every Need</h2>
+            <p class="text-xl text-gray-300 text-center mb-16 max-w-3xl mx-auto" id="pricing-subtitle">Choose the plan that best suits your conversion volume.</p>
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-10">
+                <div class="bg-gray-700 p-8 rounded-xl shadow-lg text-center border-t-4 border-gray-600 flex flex-col justify-between transform hover:scale-105 transition-transform duration-300">
+                    <div>
+                        <h3 class="text-2xl font-bold mb-4 text-gray-100" id="pricing-free-title">Free Trial</h3>
+                        <p class="text-gray-300 mb-8" id="pricing-free-desc">Limited conversions to test our quality.</p>
+                    </div>
+                    <button class="bg-gray-600 text-gray-200 px-8 py-3 rounded-lg text-lg font-semibold hover:bg-gray-500 transition-colors duration-300 shadow-md" id="pricing-free-btn">Upload</button>
+                </div>
+                <div class="bg-purple-800 text-white p-8 rounded-xl shadow-lg text-center border-t-4 border-purple-600 flex flex-col justify-between transform scale-105 hover:scale-110 transition-transform duration-300">
+                     <div>
+                        <h3 class="text-2xl font-bold mb-4" id="pricing-pro-title">Pro Plan</h3>
+                        <p class="text-purple-200 mb-8" id="pricing-pro-desc">Unlimited conversions for heavy users.</p>
+                     </div>
+                    <button class="bg-white text-purple-700 px-8 py-3 rounded-lg text-lg font-semibold hover:bg-gray-200 transition-colors duration-300 shadow-md" id="pricing-pro-btn">View Plans</button>
+                </div>
+                <div class="bg-gray-700 p-8 rounded-xl shadow-lg text-center border-t-4 border-orange-600 flex flex-col justify-between transform hover:scale-105 transition-transform duration-300">
+                     <div>
+                        <h3 class="text-2xl font-bold mb-4 text-gray-100" id="pricing-count-title">Credit Packs</h3>
+                        <p class="text-gray-300 mb-8" id="pricing-count-desc">Pay-as-you-go for occasional use.</p>
+                     </div>
+                    <button class="bg-orange-500 text-white px-8 py-3 rounded-lg text-lg font-semibold hover:bg-orange-600 transition-colors duration-300 shadow-md" id="pricing-count-btn">View Plans</button>
+                </div>
+            </div>
+             <div class="text-center mt-12">
+                 <button class="bg-green-600 text-white px-10 py-4 rounded-lg text-xl font-semibold hover:bg-green-700 transition-colors duration-300 shadow-lg transform hover:scale-105" id="pricing-pay-btn">View Plans</button>
+             </div>
+        </div>
+    </section>
+
+    <section id="about" class="py-20 bg-gray-900">
+        <div class="container mx-auto px-4 text-center">
+            <h2 class="text-3xl md:text-4xl font-bold mb-8 text-gray-100" id="about-title">Our Story & Mission</h2>
+            <p class="text-xl text-gray-300 text-center mb-16 max-w-3xl mx-auto" id="about-subtitle">Empowering you with seamless document conversion.</p>
+            <div class="flex justify-center space-x-8 mb-8">
+                <div class="w-24 h-24 bg-gray-700 rounded-full flex items-center justify-center text-gray-400 text-sm font-medium shadow-md">
+                    <img src="https://placehold.co/96x96/4B5563/D1D5DB?text=Team+Member" alt="Team Member" class="w-full h-full object-cover rounded-full">
+                </div>
+                <div class="w-24 h-24 bg-gray-700 rounded-full flex items-center justify-center text-gray-400 text-sm font-medium shadow-md">
+                    <img src="https://placehold.co/96x96/4B5563/D1D5DB?text=Team+Member" alt="Team Member" class="w-full h-full object-cover rounded-full">
+                </div>
+                <div class="w-24 h-24 bg-gray-700 rounded-full flex items-center justify-center text-gray-400 text-sm font-medium shadow-md">
+                    <img src="https://placehold.co/96x96/4B5563/D1D5DB?text=Team+Member" alt="Team Member" class="w-full h-full object-cover rounded-full">
+                </div>
+            </div>
+            <p class="text-gray-300 text-lg mb-6" id="about-members">Meet the dedicated team behind the technology.</p>
+            <p class="text-2xl font-semibold text-purple-500 mb-6" id="about-mission">Our mission is to provide the most reliable and user-friendly PDF conversion tools.</p>
+            <p class="text-gray-400 max-w-3xl mx-auto" id="about-story">Founded by a team of document processing experts, we are passionate about making your workflow easier.</p>
+        </div>
+    </section>
+
+    <section id="testimonials" class="py-20 bg-gray-800">
+         <div class="container mx-auto px-4">
+             <h2 class="text-3xl md:text-4xl font-bold text-center mb-8 text-gray-100" id="testimonials-title">What Our Users Say</h2>
+              <p class="text-xl text-gray-300 text-center mb-16 max-w-3xl mx-auto" id="testimonials-subtitle">Trusted by professionals worldwide.</p>
+             <div class="grid grid-cols-1 md:grid-cols-2 gap-10">
+                 <div class="bg-gray-700 p-8 rounded-xl shadow-lg border-l-4 border-purple-600 flex flex-col justify-between transform hover:scale-105 transition-transform duration-300">
+                     <p class="text-gray-300 text-lg mb-6 italic" id="testimonial1-text">"The accuracy is unmatched, especially for complex documents. A lifesaver!"</p>
+                     <div class="flex items-center justify-center text-yellow-400">
+                         <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="currentColor" stroke="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-star h-6 w-6"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+                         <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="currentColor" stroke="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-star h-6 w-6"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+                         <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="currentColor" stroke="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-star h-6 w-6"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+                         <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="currentColor" stroke="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-star h-6 w-6"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+                         <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="currentColor" stroke="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-star h-6 w-6"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></polygon></svg>
+                     </div>
+                 </div>
+                  <div class="bg-gray-700 p-8 rounded-xl shadow-lg border-l-4 border-orange-600 flex flex-col justify-between transform hover:scale-105 transition-transform duration-300">
+                     <p class="text-gray-300 text-lg mb-6 italic" id="testimonial2-text">"Blazingly fast and the layout preservation is spot on. Highly recommended!"</p>
+                      <div class="flex items-center justify-center text-yellow-400">
+                         <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="currentColor" stroke="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-star h-6 w-6"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+                         <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="currentColor" stroke="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-star h-6 w-6"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+                         <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="currentColor" stroke="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-star h-6 w-6"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+                         <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="currentColor" stroke="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-star h-6 w-6"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+                         <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="currentColor" stroke="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-star h-6 w-6"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></polygon></svg>
+                     </div>
+                 </div>
+             </div>
+         </div>
+    </section>
+
+
+    <section id="faq" class="py-20 bg-gray-900">
+        <div class="container mx-auto px-4">
+            <h2 class="text-3xl md:text-4xl font-bold text-center mb-8 text-gray-100" id="faq-title">Frequently Asked Questions</h2>
+            <p class="text-xl text-gray-300 text-center mb-16 max-w-3xl mx-auto" id="faq-subtitle">Find answers to common queries.</p>
+            <div class="space-y-8 max-w-3xl mx-auto">
+                <div class="bg-gray-800 p-8 rounded-xl shadow-lg cursor-pointer hover:shadow-xl transition-shadow duration-300 group border border-gray-700">
+                    <h3 class="text-xl font-semibold mb-3 text-gray-100 flex justify-between items-center" id="faq1-question">
+                        Is there a free version?
+                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-chevron-right w-6 h-6 text-gray-400 transform group-hover:rotate-90 transition-transform duration-300"><path d="m9 18 6-6-6-6"/></svg>
+                    </h3>
+                    <p class="text-gray-300" id="faq1-answer">Yes, we offer a free trial with limited daily conversions so you can experience the quality.</p>
+                </div>
+                <div class="bg-gray-800 p-8 rounded-xl shadow-lg cursor-pointer hover:shadow-xl transition-shadow duration-300 group border border-gray-700">
+                    <h3 class="text-xl font-semibold mb-3 text-gray-100 flex justify-between items-center" id="faq2-question">
+                        What output formats are supported?
+                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-chevron-right w-6 h-6 text-gray-400 transform group-hover:rotate-90 transition-transform duration-300"><path d="m9 18 6-6-6-6"/></svg>
+                    </h3>
+                    <p class="text-gray-300" id="faq2-answer">Currently, we specialize in high-quality PDF to DOCX (Word) conversion.</p>
+                </div>
+                <div class="bg-gray-800 p-8 rounded-xl shadow-lg cursor-pointer hover:shadow-xl transition-shadow duration-300 group border border-gray-700">
+                    <h3 class="text-xl font-semibold mb-3 text-gray-100 flex justify-between items-center" id="faq3-question">
+                        How secure are my files?
+                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-chevron-right w-6 h-6 text-gray-400 transform group-hover:rotate-90 transition-transform duration-300"><path d="m9 18 6-6-6-6"/></svg>
+                </h3>
+                    <p class="text-gray-300" id="faq3-answer">Your files are processed securely and automatically deleted from our servers after conversion.</p>
+                </div>
+                 <div class="bg-gray-800 p-8 rounded-xl shadow-lg cursor-pointer hover:shadow-xl transition-shadow duration-300 group border border-gray-700">
+                    <h3 class="text-xl font-semibold mb-3 text-gray-100 flex justify-between items-center" id="faq4-question">
+                        What is the refund policy?
+                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-chevron-right w-6 h-6 text-gray-400 transform group-hover:rotate-90 transition-transform duration-300"><path d="m9 18 6-6-6-6"/></svg>
+                </h3>
+                    <p class="text-gray-300" id="faq4-answer">We offer refunds under specific conditions. Please contact our support team for details.</p>
+                </div>
+                  <div class="bg-gray-800 p-8 rounded-xl shadow-lg cursor-pointer hover:shadow-xl transition-shadow duration-300 group border border-gray-700">
+                    <h3 class="text-xl font-semibold mb-3 text-gray-100 flex justify-between items-center" id="faq5-question">
+                        How good is the OCR quality?
+                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-chevron-right w-6 h-6 text-gray-400 transform group-hover:rotate-90 transition-transform duration-300"><path d="m9 18 6-6-6-6"/></svg>
+                </h3>
+                    <p class="text-gray-300" id="faq5-answer">Our AI-powered OCR delivers industry-leading accuracy, even on challenging scanned documents.</p>
+                </div>
+                 <div class="bg-gray-800 p-8 rounded-xl shadow-lg cursor-pointer hover:shadow-xl transition-shadow duration-300 group border border-gray-700">
+                    <h3 class="text-xl font-semibold mb-3 text-gray-100 flex justify-between items-center" id="faq6-question">
+                        Can I convert multiple files at once?
+                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-chevron-right w-6 h-6 text-gray-400 transform group-hover:rotate-90 transition-transform duration-300"><path d="m9 18 6-6-6-6"/></svg>
+                </h3>
+                    <p class="text-gray-300" id="faq6-answer">Yes, batch conversion is supported for paid plans, significantly boosting your productivity.</p>
+                </div>
+                 <div class="bg-gray-800 p-8 rounded-xl shadow-lg cursor-pointer hover:shadow-xl transition-shadow duration-300 group border border-gray-700">
+                    <h3 class="text-xl font-semibold mb-3 text-gray-100 flex justify-between items-center" id="faq7-question">
+                        What factors influence conversion speed?
+                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-chevron-right w-6 h-6 text-gray-400 transform group-hover:rotate-90 transition-transform duration-300"><path d="m9 18 6-6-6-6"/></svg>
+                </h3>
+                    <p class="text-gray-300" id="faq7-answer">Speed depends on file size, PDF complexity (digital vs. scanned, number of elements), and current server load.</p>
+                </div>
+                 <div class="bg-gray-800 p-8 rounded-xl shadow-lg cursor-pointer hover:shadow-xl transition-shadow duration-300 group border border-gray-700">
+                    <h3 class="text-xl font-semibold mb-3 text-gray-100 flex justify-between items-center" id="faq8-question">
+                        Which plan is right for me?
+                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-chevron-right w-6 h-6 text-gray-400 transform group-hover:rotate-90 transition-transform duration-300"><path d="m9 18 6-6-6-6"/></svg>
+                </h3>
+                    <p class="text-gray-300" id="faq8-answer">The Free Trial is great for testing. Pro is for frequent, high-volume users. Credit Packs are ideal for occasional conversions.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section id="start-converting" class="py-20 bg-gray-800 text-center">
+        <div class="container mx-auto px-4">
+            <h2 class="text-3xl md:text-4xl font-bold mb-8 text-gray-100" id="start-converting-title">Start Converting Today</h2>
+             <p class="text-xl text-gray-300 mb-12 max-w-3xl mx-auto" id="start-converting-subtitle">Choose the conversion type that suits your needs and get started instantly.</p>
+            <div class="flex flex-col md:flex-row justify-center space-y-6 md:space-y-0 md:space-x-8">
+                <button class="bg-purple-600 text-white px-8 py-3 rounded-lg text-xl font-semibold hover:bg-purple-700 transition-colors duration-300 shadow-lg transform hover:scale-105 flex items-center justify-center" id="start-digital-btn">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-file-digit mr-3 w-6 h-6"><line x1="9" x2="9" y1="12" y2="18"/><line x1="15" x2="15" y1="6" y2="18"/><path d="M12 12a4 4 0 0 0-4 4v2a2 2 0 0 0 2 2h4a2 2 0 0 0 2-2v-2a4 4 0 0 0-4-4Z"/><path d="M4 22h16a2 2 0 0 0 2-2V8L14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2Z"/><path d="M14 2v6h6"/></svg>
+                    <span id="start-digital-btn-text">Convert Digital PDF</span>
+                </button>
+                <button class="bg-indigo-600 text-white px-8 py-3 rounded-lg text-xl font-semibold hover:bg-indigo-700 transition-colors duration-300 shadow-lg transform hover:scale-105 flex items-center justify-center" id="start-image-btn">
+                     <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-scan-text mr-3 w-6 h-6"><path d="M3 7V5a2 2 0 0 1 2-2h2"/><path d="M17 3h2a2 2 0 0 1 2 2v2"/><path d="M21 17v2a2 2 0 0 1-2 2h-2"/><path d="M7 21H5a2 2 0 0 1-2-2v-2"/><path d="M7 12h10"/><path d="M12 17v-5"/></svg>
+                    <span id="start-image-btn-text">Convert Image PDF (OCR)</span>
+                </button>
+            </div>
+        </div>
+    </section>
+
+
+    <footer class="bg-gray-950 text-gray-500 py-12 text-center">
+        <div class="container mx-auto px-4">
+            <p class="mb-4 text-lg" id="footer-company">© 2023 PDF Converter. All rights reserved.</p>
+            <p class="mb-6" id="footer-email">Support: support@example.com</p>
+            <div class="flex justify-center space-x-8 mb-6 text-gray-600">
+                <a href="#" class="hover:text-purple-400 transition-colors duration-300" id="footer-user-agreement">Terms of Service</a>
+                <a href="#" class="hover:text-purple-400 transition-colors duration-300" id="footer-privacy-policy">Privacy Policy</a>
+            </div>
+            <div class="flex justify-center space-x-6 text-gray-600">
+                <a href="#" class="hover:text-purple-400 transition-colors duration-300">
+                      Twitter
+                </a>
+                <a href="#" class="hover:text-purple-400 transition-colors duration-300">
+                      Facebook
+                </a>
+                <a href="#" class="hover:text-purple-400 transition-colors duration-300">
+                      Instagram
+                </a>
+            </div>
+             <p class="mt-8 text-gray-600" id="footer-copyright">&copy; 2023 PDF Converter. All rights reserved.</p>
+        </div>
+    </footer>
+
+    <div id="summary-modal" class="fixed inset-0 bg-black bg-opacity-75 flex items-center justify-center p-4 z-[9999] hidden">
+        <div class="bg-gray-800 rounded-xl shadow-2xl p-8 w-full max-w-2xl max-h-[90vh] flex flex-col">
+            <div class="flex justify-between items-center mb-6">
+                <h3 class="text-2xl font-bold text-gray-100" id="summary-modal-title">Document Summary</h3>
+                <button id="summary-modal-close-btn" class="text-gray-400 hover:text-gray-200 transition-colors duration-200">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-x"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg>
+                </button>
+            </div>
+            <div id="summary-modal-content" class="text-gray-300 text-lg leading-relaxed overflow-y-auto custom-scrollbar flex-grow">
+                </div>
+        </div>
+    </div>
+
+    <script>
+        // Define the gradient class for highlighting
+        // Changed gradient to yellow-orange
+        const gradientTextClass = "bg-clip-text text-transparent bg-gradient-to-r from-yellow-300 to-orange-500";
+
+        // Translations object
+        const translations = {
+            en: {
+                logo: "PDF Converter",
+                digitalPdfNav: "Digital PDF",
+                imagePdfNav: "Image PDF (OCR)",
+                showcaseNav: "Examples",
+                pricingNav: "Pricing",
+                aboutNav: "About Us",
+                loginBtn: "Login",
+                registerBtn: "Sign Up",
+                // Swapped and modified hero section texts
+                heroOriginalTitle: "Transform Your PDFs into <span class='${gradientTextClass}'>Editable</span> Word Documents",
+                heroOriginalSubtitle: "Experience the <span class='${gradientTextClass}'>Fastest</span> and <span class='${gradientTextClass}'>Most Accurate</span> PDF to Word conversion with intelligent layout preservation and <span class='${gradientTextClass}'>Real-time Editing</span>.",
+                heroDigitalBtn: "Convert Digital PDF",
+                heroImageBtn: "Convert Image PDF (OCR)",
+                digitalConverterTitle: "Digital PDF to Word Conversion",
+                digitalConverterSubtitle: "Convert born-digital PDFs with flawless accuracy and speed.",
+                digitalFeature1Title: "Pixel-Perfect Text & Formatting",
+                digitalFeature1Desc: "Maintains original text formatting, fonts, and styles without loss.",
+                digitalFeature2Title: "Accurate Vector Graphics",
+                digitalFeature2Desc: "Accurately converts vector elements for crisp, scalable graphics.",
+                digitalFeature3Title: "Complex Layouts Handled",
+                digitalFeature3Desc: "Handles multi-column layouts, headers, footers, and intricate structures effortlessly.",
+                digitalFeature4Title: "Hyperlinks & Bookmarks",
+                digitalFeature4Desc: "Preserves interactive elements like links and internal document bookmarks.",
+                imageConverterTitle: "Image PDF to Word Conversion (OCR)",
+                imageConverterSubtitle: "Unlock scanned documents and make them editable using advanced OCR.",
+                imageFeature1Title: "Advanced AI-Powered OCR",
+                imageFeature1Desc: "Industry-leading accuracy for recognizing text in scanned images.",
+                imageFeature2Title: "Intelligent Table & Image Handling",
+                imageFeature2Desc: "Identifies and reconstructs tables and integrates images seamlessly.",
+                imageFeature3Title: "Broad Language Support",
+                imageFeature3Desc: "Recognizes text in over 100 languages.",
+                imageFeature4Title: "Noise Reduction & Enhancement",
+                imageFeature4Desc: "Cleans up scanned images for better recognition results.",
+                dropzoneText: "Drag & drop your PDF file here",
+                dropzoneSubText: "or click to browse",
+                selectedFile: "Selected File",
+                convertBtn: "Convert",
+                downloadConvertedBtn: "Download Converted File",
+                editOnlineBtn: "Edit Online",
+                downloadEditedBtn: "Download Edited Document",
+                editingSectionTitle: "Online Editor (Preview)",
+                editingPlaceholder: "Upload and convert a PDF to use the online editor.",
+                showcaseTitle: "See the Quality: Before & After",
+                showcaseSubtitle: "Experience the accuracy of our conversion with real-world examples.",
+                showcaseDigitalTitle: "Digital PDF Example",
+                showcaseImageTitle: "Image PDF (OCR) Example",
+                showcaseOriginal: "Original PDF",
+                showcaseConverted: "Converted Word Document",
+                pricingTitle: "Flexible Pricing for Every Need",
+                pricingSubtitle: "Choose the plan that best suits your conversion volume.",
+                pricingFreeTitle: "Free Trial",
+                pricingFreeDesc: "Limited conversions to test our quality.",
+                pricingProTitle: "Pro Plan",
+                pricingProDesc: "Unlimited conversions for heavy users.",
+                pricingCountTitle: "Credit Packs",
+                pricingCountDesc: "Pay-as-you-go for occasional use.",
+                pricingPayBtn: "View Plans",
+                aboutTitle: "Our Story & Mission",
+                aboutSubtitle: "Empowering you with seamless document conversion.",
+                aboutMembers: "Meet the dedicated team behind the technology.",
+                aboutMission: "Our mission is to provide the most reliable and user-friendly PDF conversion tools.",
+                aboutStory: "Founded by a team of document processing experts, we are passionate about making your workflow easier.",
+                testimonialsTitle: "What Our Users Say",
+                testimonialsSubtitle: "Trusted by professionals worldwide.",
+                testimonial1Text: "The accuracy is unmatched, especially for complex documents. A lifesaver!",
+                testimonial2Text: "Blazingly fast and the layout preservation is spot on. Highly recommended!",
+                faqTitle: "Frequently Asked Questions",
+                faqSubtitle: "Find answers to common queries.",
+                faq1Question: "Is there a free version?",
+                faq1Answer: "Yes, we offer a free trial with limited daily conversions so you can experience the quality.",
+                faq2Question: "What output formats are supported?",
+                faq2Answer: "Currently, we specialize in high-quality PDF to DOCX (Word) conversion.",
+                faq3Question: "How secure are my files?",
+                faq3Answer: "Your files are processed securely and automatically deleted from our servers after conversion.",
+                faq4Question: "What is the refund policy?",
+                faq4Answer: "We offer refunds under specific conditions. Please contact our support team for details.",
+                faq5Question: "How good is the OCR quality?",
+                faq5Answer: "Our AI-powered OCR delivers industry-leading accuracy, even on challenging scanned documents.",
+                faq6Question: "Can I convert multiple files at once?",
+                faq6Answer: "Yes, batch conversion is supported for paid plans, significantly boosting your productivity.",
+                faq7Question: "What factors influence conversion speed?",
+                faq7Answer: "Speed depends on file size, PDF complexity (digital vs. scanned, number of elements), and current server load.",
+                faq8Question: "Which plan is right for me?",
+                faq8Answer: "The Free Trial is great for testing. Pro is for frequent, high-volume users. Credit Packs are ideal for occasional conversions.",
+                footerCompany: "© {year} PDF Converter. All rights reserved.",
+                footerEmail: "Support: support@example.com",
+                footerUserAgreement: "Terms of Service",
+                footerPrivacyPolicy: "Privacy Policy", // Corrected key
+                statusUploading: "Uploading...",
+                statusConverting: "Converting...",
+                statusSuccess: "Conversion successful!",
+                statusError: "Conversion failed. Please try again.",
+                statusReady: "Ready to convert",
+                statusNoFile: "Please select a PDF file.",
+                uploadBtn: "Upload",
+                startConvertingTitle: "Start Converting Today",
+                startConvertingSubtitle: "Choose the conversion type that suits your needs and get started instantly.",
+                startDigitalBtn: "Convert Digital PDF",
+                startImageBtn: "Convert Image PDF (OCR)",
+                summarizeBtn: "Summarize Document ✨",
+                summaryModalTitle: "Document Summary",
+                summaryLoading: "Generating summary...",
+                summaryError: "Failed to generate summary. Please try again."
+            },
+            zh: {
+                logo: "PDF 转换工具",
+                digitalPdfNav: "数字 PDF",
+                imagePdfNav: "图像 PDF (OCR)",
+                showcaseNav: "实例展示",
+                pricingNav: "定价",
+                aboutNav: "关于我们",
+                loginBtn: "登录",
+                registerBtn: "注册",
+                // Swapped and modified hero section texts
+                heroOriginalTitle: "将您的 PDF 转换为<span class='${gradientTextClass}'>可编辑的</span> Word 文档",
+                heroOriginalSubtitle: "体验<span class='${gradientTextClass}'>最快</span>、<span class='${gradientTextClass}'>最精准</span>的 PDF 转 Word 转换，智能保留版式并<span class='${gradientTextClass}'>支持在线编辑</span>。",
+                heroDigitalBtn: "转换数字 PDF",
+                heroImageBtn: "转换图像 PDF (OCR)",
+                digitalConverterTitle: "数字 PDF 转 Word 转换",
+                digitalConverterSubtitle: "以完美无瑕的精度和速度转换原生数字 PDF。",
+                digitalFeature1Title: "像素级文本与格式还原",
+                digitalFeature1Desc: "保持原始文本格式、字体和样式，无任何损失。",
+                digitalFeature2Title: "精准矢量图形转换",
+                digitalFeature2Desc: "精准转换矢量元素，在 Word 中获得清晰、可缩放的图形。",
+                digitalFeature3Title: "复杂版式保留",
+                digitalFeature3Desc: "轻松处理多列布局、页眉、页脚和复杂的结构。",
+                digitalFeature4Title: "支持超链接与书签",
+                digitalFeature4Desc: "保留超链接和文档内部书签等交互元素。",
+                imageConverterTitle: "图像 PDF 转 Word 转换 (OCR)",
+                imageConverterSubtitle: "使用先进的 OCR 技术，解锁扫描文档并使其可编辑。",
+                imageFeature1Title: "先进的 AI OCR 技术",
+                imageFeature1Desc: "行业领先的精度，可识别扫描图像中的文本。",
+                imageFeature2Title: "智能表格与图片处理",
+                imageFeature2Desc: "智能识别并重构表格，无缝集成图片。",
+                imageFeature3Title: "广泛的语言支持 (100+ 种语言)",
+                imageFeature3Desc: "支持超过 100 种语言的文本识别。",
+                imageFeature4Title: "降噪与图像增强",
+                imageFeature4Desc: "清理扫描图像，提高识别效果。",
+                dropzoneText: "将 PDF 文件拖拽到此处",
+                dropzoneSubText: "或点击上传",
+                selectedFile: "已选择文件",
+                convertBtn: "转换",
+                downloadConvertedBtn: "下载转换文件",
+                editOnlineBtn: "在线编辑",
+                downloadEditedBtn: "下载编辑后文档",
+                editingSectionTitle: "在线编辑器 (预览)",
+                editingPlaceholder: "上传并转换 PDF 文件后，即可使用在线编辑器。",
+                showcaseTitle: "查看转换质量：原文件与转换后文件",
+                showcaseSubtitle: "通过真实案例，体验我们转换的精准度。",
+                showcaseDigitalTitle: "数字 PDF 转换实例",
+                showcaseImageTitle: "图像 PDF (OCR) 转换实例",
+                showcaseOriginal: "原始 PDF",
+                showcaseConverted: "转换后 Word 文档",
+                pricingTitle: "灵活的定价方案，满足不同需求",
+                pricingSubtitle: "选择最适合您转换量的方案。",
+                pricingFreeTitle: "免费试用",
+                pricingFreeDesc: "有限次数的转换，体验我们的质量。",
+                pricingProTitle: "专业版",
+                pricingProDesc: "无限次转换，适合重度用户。",
+                pricingCountTitle: "计次卡",
+                pricingCountDesc: "按需付费，适合偶尔使用。",
+                pricingPayBtn: "查看方案",
+                aboutTitle: "我们的故事与使命",
+                aboutSubtitle: "助力您实现无缝的文档转换。",
+                aboutMembers: "认识我们专注的技术团队。",
+                aboutMission: "我们的使命是提供最可靠、最易用的 PDF 转换工具。",
+                aboutStory: "由一群文档处理专家创立，我们热衷于让您的工作流程更轻松。",
+                testimonialsTitle: "用户评价",
+                testimonialsSubtitle: "受到全球专业人士的信赖。",
+                testimonial1Text: "精度无与伦比，特别是对于复杂文档。简直是救星！",
+                testimonial2Text: "速度飞快，版式还原也非常到位。强烈推荐！",
+                faqTitle: "常见问题解答",
+                faqSubtitle: "查找常见问题的答案。",
+                faq1Question: "有免费版本吗？",
+                faq1Answer: "是的，我们提供每日有限次数的免费试用，您可以体验我们的质量。",
+                faq2Question: "支持哪些输出格式？",
+                faq2Answer: "目前，我们专注于高质量的 PDF 到 DOCX (Word) 转换。",
+                faq3Question: "我的文件在处理过程中是否安全?",
+                faq3Answer: "您的文件会经过安全处理，并在转换后自动从我们的服务器删除。",
+                faq4Question: "你们会如何处理退款事宜?",
+                faq4Answer: "请联系我们的客服，我们会为您处理退款事宜。",
+                faq5Question: "OCR的质量有多么好?",
+                faq5Answer: "我们的 AI 驱动 OCR 即使在具有挑战性的扫描文档上也能提供行业领先的精度。",
+                faq6Question: "是否支持批量转换？",
+                faq6Answer: "是的，付费方案支持批量转换，显著提高您的工作效率。",
+                faq7Question:"哪些因素会影响我的转化速度?",
+                faq7Answer: "速度取决于文件大小、PDF 复杂性（数字或扫描、元素数量）和当前服务器负载。",
+                faq8Question: "哪种方案更适合我?",
+                faq8Answer: "免费试用版适合测试。专业版适合频繁、大批量用户。计次卡适合偶尔使用。",
+                footerCompany: "© {year} PDF 转换工具。保留所有权利。",
+                footerEmail: "支持邮箱：support@example.com",
+                footerUserAgreement: "服务条款",
+                footerPrivacyPolicy: "隐私政策",
+                statusUploading: "上传中...",
+                statusConverting: "转换中...",
+                statusSuccess: "转换成功！",
+                statusError: "转换失败，请重试。",
+                statusReady: "准备转换",
+                statusNoFile: "请选择一个 PDF 文件。",
+                uploadBtn: "上传",
+                startConvertingTitle: "立即开始转换",
+                startConvertingSubtitle: "选择适合您的转换类型，立即开始。",
+                startDigitalBtn: "转换数字 PDF",
+                startImageBtn: "转换图像 PDF (OCR)",
+                summarizeBtn: "摘要文档 ✨",
+                summaryModalTitle: "文档摘要",
+                summaryLoading: "正在生成摘要...",
+                summaryError: "生成摘要失败，请重试。"
+            },
+        };
+
+        // Helper function for translation
+        const t = (key, lang) => {
+            const text = translations[lang]?.[key] || translations['en'][key] || key; // Fallback to English or key itself
+            if (key === 'footerCompany') {
+                return text.replace('{year}', new Date().getFullYear());
+            }
+            // Replace placeholder for gradient class
+            return text.replace(/\$\{gradientTextClass\}/g, gradientTextClass);
+        };
+
+        // Function to update all text elements based on current language
+        const updateTextContent = (lang) => {
+            // Helper to safely update element text
+            const updateElementText = (id, key, isHtml = false) => {
+                const element = document.getElementById(id);
+                if (element) {
+                    if (isHtml) {
+                        element.innerHTML = t(key, lang);
+                    } else {
+                        element.innerText = t(key, lang);
+                    }
+                }
+            };
+
+            // Helper to safely update element text node (for FAQ questions with Lucide icons)
+            const updateElementTextNode = (id, key) => {
+                const element = document.getElementById(id);
+                if (element && element.childNodes.length > 0) {
+                    // Ensure the first child is a text node before updating
+                    if (element.childNodes[0].nodeType === Node.TEXT_NODE) {
+                        element.childNodes[0].nodeValue = t(key, lang) + ' ';
+                    }
+                }
+            };
+
+            updateElementText('logo', 'logo');
+            updateElementText('nav-digital', 'digitalPdfNav');
+            updateElementText('nav-image', 'imagePdfNav');
+            updateElementText('nav-showcase', 'showcaseNav');
+            updateElementText('nav-pricing', 'pricingNav');
+            updateElementText('nav-about', 'aboutNav');
+            updateElementText('login-btn', 'loginBtn');
+            updateElementText('register-btn', 'registerBtn');
+
+            updateElementText('hero-main-message', 'heroOriginalSubtitle', true);
+            updateElementText('hero-secondary-message', 'heroOriginalTitle', true);
+
+            updateElementText('hero-digital-btn', 'heroDigitalBtn');
+            updateElementText('hero-image-btn', 'heroImageBtn');
+
+            updateElementText('digital-converter-title', 'digitalConverterTitle');
+            updateElementText('digital-converter-subtitle', 'digitalConverterSubtitle');
+            updateElementText('digital-feature1-title', 'digitalFeature1Title');
+            updateElementText('digital-feature1-desc', 'digitalFeature1Desc');
+            updateElementText('digital-feature2-title', 'digitalFeature2Title');
+            updateElementText('digital-feature2-desc', 'digitalFeature2Desc');
+            updateElementText('digital-feature3-title', 'digitalFeature3Title');
+            updateElementText('digital-feature3-desc', 'digitalFeature3Desc');
+            updateElementText('digital-feature4-title', 'digitalFeature4Title');
+            updateElementText('digital-feature4-desc', 'digitalFeature4Desc');
+            updateElementText('digital-dropzone-text', 'dropzoneText');
+            updateElementText('digital-dropzone-subtext', 'dropzoneSubText');
+            updateElementText('digital-convert-btn-text', 'convertBtn');
+            updateElementText('digital-download-converted-btn-text', 'downloadConvertedBtn');
+            updateElementText('digital-edit-online-btn-text', 'editOnlineBtn');
+            updateElementText('digital-summarize-btn-text', 'summarizeBtn');
+
+
+            updateElementText('image-converter-title', 'imageConverterTitle');
+            updateElementText('image-converter-subtitle', 'imageConverterSubtitle');
+            updateElementText('image-feature1-title', 'imageFeature1Title');
+            updateElementText('image-feature1-desc', 'imageFeature1Desc');
+            updateElementText('image-feature2-title', 'imageFeature2Title');
+            updateElementText('image-feature2-desc', 'imageFeature2Desc');
+            updateElementText('image-feature3-title', 'imageFeature3Title');
+            updateElementText('image-feature3-desc', 'imageFeature3Desc');
+            updateElementText('image-feature4-title', 'imageFeature4Title');
+            updateElementText('image-feature4-desc', 'imageFeature4Desc');
+            updateElementText('image-dropzone-text', 'dropzoneText');
+            updateElementText('image-dropzone-subtext', 'dropzoneSubText');
+            updateElementText('image-convert-btn-text', 'convertBtn');
+            updateElementText('image-download-converted-btn-text', 'downloadConvertedBtn');
+            updateElementText('image-edit-online-btn-text', 'editOnlineBtn');
+            updateElementText('image-summarize-btn-text', 'summarizeBtn');
+
+
+            updateElementText('editing-section-title', 'editingSectionTitle');
+            updateElementText('editing-placeholder-text', 'editingPlaceholder');
+            updateElementText('download-edited-btn-text', 'downloadEditedBtn');
+
+            updateElementText('showcase-title', 'showcaseTitle');
+            updateElementText('showcase-subtitle', 'showcaseSubtitle');
+            updateElementText('showcase-digital-title', 'showcaseDigitalTitle');
+            updateElementText('showcase-image-title', 'showcaseImageTitle');
+            updateElementText('showcase-original-digital', 'showcaseOriginal');
+            updateElementText('showcase-converted-digital', 'showcaseConverted');
+            updateElementText('showcase-original-image', 'showcaseOriginal');
+            updateElementText('showcase-converted-image', 'showcaseConverted');
+
+
+            updateElementText('pricing-title', 'pricingTitle');
+            updateElementText('pricing-subtitle', 'pricingSubtitle');
+            updateElementText('pricing-free-title', 'pricingFreeTitle');
+            updateElementText('pricing-free-desc', 'pricingFreeDesc');
+            updateElementText('pricing-free-btn', 'uploadBtn');
+            updateElementText('pricing-pro-title', 'pricingProTitle');
+            updateElementText('pricing-pro-desc', 'pricingProDesc');
+            updateElementText('pricing-pro-btn', 'pricingPayBtn');
+            updateElementText('pricing-count-title', 'pricingCountTitle');
+            updateElementText('pricing-count-desc', 'pricingCountDesc');
+            updateElementText('pricing-count-btn', 'pricingPayBtn');
+            updateElementText('pricing-pay-btn', 'pricingPayBtn');
+
+            updateElementText('about-title', 'aboutTitle');
+            updateElementText('about-subtitle', 'aboutSubtitle');
+            updateElementText('about-members', 'aboutMembers');
+            updateElementText('about-mission', 'aboutMission');
+            updateElementText('about-story', 'aboutStory');
+
+            updateElementText('testimonials-title', 'testimonialsTitle');
+            updateElementText('testimonials-subtitle', 'testimonialsSubtitle');
+            updateElementText('testimonial1-text', 'testimonial1Text');
+            updateElementText('testimonial2-text', 'testimonial2Text');
+
+            updateElementText('faq-title', 'faqTitle');
+            updateElementText('faq-subtitle', 'faqSubtitle');
+
+            updateElementTextNode('faq1-question', 'faq1Question');
+            updateElementText('faq1-answer', 'faq1Answer');
+            updateElementTextNode('faq2-question', 'faq2Question');
+            updateElementText('faq2-answer', 'faq2Answer');
+            updateElementTextNode('faq3-question', 'faq3Question');
+            updateElementText('faq3-answer', 'faq3Answer');
+            updateElementTextNode('faq4-question', 'faq4Question');
+            updateElementText('faq4-answer', 'faq4Answer');
+            updateElementTextNode('faq5-question', 'faq5Question');
+            updateElementText('faq5-answer', 'faq5Answer');
+            updateElementTextNode('faq6-question', 'faq6Question');
+            updateElementText('faq6-answer', 'faq6Answer');
+            updateElementTextNode('faq7-question', 'faq7Question');
+            updateElementText('faq7-answer', 'faq7Answer');
+            updateElementTextNode('faq8-question', 'faq8Question');
+            updateElementText('faq8-answer', 'faq8Answer');
+
+            updateElementText('start-converting-title', 'startConvertingTitle');
+            updateElementText('start-converting-subtitle', 'startConvertingSubtitle');
+            updateElementText('start-digital-btn-text', 'startDigitalBtn');
+            updateElementText('start-image-btn-text', 'startImageBtn');
+
+
+            updateElementText('footer-company', 'footerCompany');
+            updateElementText('footer-email', 'footerEmail');
+            updateElementText('footer-user-agreement', 'footerUserAgreement');
+            updateElementText('footer-privacy-policy', 'footerPrivacyPolicy');
+            const footerCopyrightElement = document.getElementById('footer-copyright');
+            if (footerCopyrightElement) {
+                footerCopyrightElement.innerText = `© ${new Date().getFullYear()} ${t('logo', lang)}. ${t('footerCompany', lang).split('. ')[1] || 'All rights reserved.'}`;
+            }
+
+
+             // Update status message if visible
+             const digitalStatus = document.getElementById('digital-status-message');
+             if (digitalStatus && digitalStatus.innerText) {
+                 // Simplify text comparison by removing potential icons/HTML before matching
+                 const currentStatusText = digitalStatus.innerText.replace(/[\u{2705}\u{274C}\u{231B}\u{FE0F}]/gu, '').trim(); // Remove icons for matching
+                 const statusKeys = ['statusUploading', 'statusConverting', 'statusSuccess', 'statusError', 'statusReady', 'statusNoFile'];
+                 // Find the original English key based on current text in either language
+                 const matchingKey = statusKeys.find(key => translations.en[key] === currentStatusText || translations.zh[key] === currentStatusText);
+
+                 if (matchingKey) {
+                      // Update with the translated text
+                      digitalStatus.innerText = t(matchingKey, lang);
+                       // Re-add icons if necessary based on status (re-adding logic here is simple, updateUI does more)
+                       if (matchingKey === 'statusSuccess') {
+                           digitalStatus.insertAdjacentHTML('afterbegin', '<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-check-circle inline-block mr-2 w-6 h-6 align-middle"><circle cx="12" cy="12" r="10"/><path d="m9 12 2 2 4-4"/></svg>');
+                       } else if (matchingKey === 'statusError') {
+                           digitalStatus.insertAdjacentHTML('afterbegin', '<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-x-circle inline-block mr-2 w-6 h-6 align-middle"><circle cx="12" cy="12" r="10"/><path d="m15 9-6 6"/><path d="m9 9 6 6"/></svg>');
+                       }
+                 }
+             }
+
+            const imageStatus = document.getElementById('image-status-message');
+             if (imageStatus && imageStatus.innerText) {
+                 const currentStatusText = imageStatus.innerText.replace(/[\u{2705}\u{274C}\u{231B}\u{FE0F}]/gu, '').trim(); // Remove icons for matching
+                 const statusKeys = ['statusUploading', 'statusConverting', 'statusSuccess', 'statusError', 'statusReady', 'statusNoFile'];
+                 const matchingKey = statusKeys.find(key => translations.en[key] === currentStatusText || translations.zh[key] === currentStatusText);
+
+                 if (matchingKey) {
+                      imageStatus.innerText = t(matchingKey, lang);
+                       // Re-add icons if necessary based on status
+                       if (matchingKey === 'statusSuccess') {
+                           imageStatus.insertAdjacentHTML('afterbegin', '<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-check-circle inline-block mr-2 w-6 h-6 align-middle"><circle cx="12" cy="12" r="10"/><path d="m9 12 2 2 4-4"/></svg>');
+                       } else if (matchingKey === 'statusError') {
+                           imageStatus.insertAdjacentHTML('afterbegin', '<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-x-circle inline-block mr-2 w-6 h-6 align-middle"><circle cx="12" cy="12" r="10"/><path d="m15 9-6 6"/><path d="m9 9 6 6"/></svg>');
+                       }
+                 }
+             }
+
+
+             // Update canvas placeholder text
+             const canvas = document.getElementById('editing-canvas');
+             if (canvas) {
+                 const ctx = canvas.getContext('2d');
+                 ctx.clearRect(0, 0, canvas.width, canvas.height); // Clear previous text
+                 ctx.fillStyle = '#6b7280'; // gray-500
+                 ctx.font = '16px Inter, sans-serif';
+                 ctx.textAlign = 'center';
+                 ctx.fillText(t('editingPlaceholder', currentLanguage), canvas.width / 2, canvas.height / 2);
+             }
+
+             // Update modal title
+             const summaryModalTitle = document.getElementById('summary-modal-title');
+             if (summaryModalTitle) {
+                 summaryModalTitle.innerText = t('summaryModalTitle', lang);
+             }
+        };
+
+        // Smooth scroll function
+        const scrollToSection = (id) => {
+            const element = document.getElementById(id);
+            if (element) {
+                element.scrollIntoView({ behavior: 'smooth' });
+            }
+        };
+
+        // Get DOM elements
+        const fileInput = document.getElementById('file-input');
+        const digitalDropzone = document.getElementById('digital-dropzone');
+        const imageDropzone = document.getElementById('image-dropzone');
+        const digitalSelectedFile = document.getElementById('digital-selected-file');
+        const imageSelectedFile = document.getElementById('image-selected-file');
+        const digitalConversionArea = document.getElementById('digital-conversion-area');
+        const imageConversionArea = document.getElementById('image-conversion-area');
+        const digitalConvertBtn = document.getElementById('digital-convert-btn');
+        const imageConvertBtn = document.getElementById('image-convert-btn');
+        const digitalDownloadConvertedBtn = document.getElementById('digital-download-converted-btn');
+        const imageDownloadConvertedBtn = document.getElementById('image-download-converted-btn');
+        const digitalEditOnlineBtn = document.getElementById('digital-edit-online-btn');
+        const imageEditOnlineBtn = document.getElementById('image-edit-online-btn');
+        const digitalProgressBarContainer = document.getElementById('digital-progress-bar-container');
+        const imageProgressBarContainer = document.getElementById('image-progress-bar-container');
+        const digitalProgressBar = document.getElementById('digital-progress-bar');
+        const imageProgressBar = document.getElementById('image-progress-bar');
+        const digitalStatusMessage = document.getElementById('digital-status-message');
+        const imageStatusMessage = document.getElementById('image-status-message');
+        const languageSelect = document.getElementById('language-select');
+        const canvas = document.getElementById('editing-canvas');
+        const downloadEditedContainer = document.getElementById('download-edited-container');
+        const downloadEditedBtn = document.getElementById('download-edited-btn');
+
+        // New section buttons
+        const startDigitalBtn = document.getElementById('start-digital-btn');
+        const startImageBtn = document.getElementById('start-image-btn');
+
+        // New Gemini API related elements
+        const digitalSummarizeBtn = document.getElementById('digital-summarize-btn');
+        const imageSummarizeBtn = document.getElementById('image-summarize-btn');
+        const summaryModal = document.getElementById('summary-modal');
+        const summaryModalContent = document.getElementById('summary-modal-content');
+        const summaryModalCloseBtn = document.getElementById('summary-modal-close-btn');
+
+
+        let selectedFile = null;
+        let conversionType = null; // 'digital' or 'image'
+        let conversionStatus = 'ready'; // 'ready', 'uploading', 'converting', 'success', 'error', 'noFile'
+        let progress = 0;
+        let currentLanguage = 'zh'; // Default language
+        let convertedFileReady = false;
+        let intendedConversionType = null; // To track which dropzone was clicked/used
+
+        // Function to reset the state for a new upload
+        const resetState = () => {
+             selectedFile = null;
+             conversionType = null;
+             conversionStatus = 'ready';
+             progress = 0;
+             convertedFileReady = false;
+             intendedConversionType = null;
+             updateUI(); // Update UI to reflect the reset state
+        };
+
+
+        // Function to update UI based on state
+        const updateUI = () => {
+            const lang = currentLanguage;
+
+            // Hide all conversion-related elements initially for both types
+            if (digitalConversionArea) digitalConversionArea.classList.add('hidden');
+            if (imageConversionArea) imageConversionArea.classList.add('hidden');
+            if (digitalProgressBarContainer) digitalProgressBarContainer.classList.add('hidden');
+            if (imageProgressBarContainer) imageProgressBarContainer.classList.add('hidden');
+            if (digitalStatusMessage) digitalStatusMessage.innerText = '';
+            if (imageStatusMessage) imageStatusMessage.innerText = '';
+            if (digitalSelectedFile) digitalSelectedFile.innerText = '';
+            if (imageSelectedFile) imageSelectedFile.innerText = '';
+            if (downloadEditedContainer) downloadEditedContainer.classList.add('hidden');
+            if (digitalSummarizeBtn) digitalSummarizeBtn.classList.add('hidden');
+            if (imageSummarizeBtn) imageSummarizeBtn.classList.add('hidden');
+
+
+            if (selectedFile) {
+                 // Show the conversion area for the selected type
+                const currentConversionArea = conversionType === 'digital' ? digitalConversionArea : imageConversionArea;
+                const currentSelectedFileDisplay = conversionType === 'digital' ? digitalSelectedFile : imageSelectedFile;
+                const currentConvertBtn = conversionType === 'digital' ? digitalConvertBtn : imageConvertBtn;
+                const currentDownloadBtn = conversionType === 'digital' ? digitalDownloadConvertedBtn : imageDownloadConvertedBtn;
+                const currentEditBtn = conversionType === 'digital' ? digitalEditOnlineBtn : imageEditOnlineBtn;
+                const currentSummarizeBtn = conversionType === 'digital' ? digitalSummarizeBtn : imageSummarizeBtn; // Get summarize button
+                const currentLoadingSpinner = document.getElementById(conversionType === 'digital' ? 'digital-loading-spinner' : 'image-loading-spinner');
+                const currentProgressBarContainer = conversionType === 'digital' ? digitalProgressBarContainer : imageProgressBarContainer;
+                const currentProgressBar = conversionType === 'digital' ? digitalProgressBar : imageProgressBar;
+                const currentStatusMessageElement = conversionType === 'digital' ? digitalStatusMessage : imageStatusMessage;
+
+
+                if (currentSelectedFileDisplay) currentSelectedFileDisplay.innerText = `${t('selectedFile', lang)}: ${selectedFile.name}`;
+                if (currentConversionArea) currentConversionArea.classList.remove('hidden');
+                if (currentConvertBtn) currentConvertBtn.classList.remove('hidden');
+                if (currentDownloadBtn) currentDownloadBtn.classList.add('hidden');
+                if (currentEditBtn) currentEditBtn.classList.add('hidden');
+                if (currentSummarizeBtn) currentSummarizeBtn.classList.add('hidden');
+                if (currentLoadingSpinner) currentLoadingSpinner.classList.add('hidden');
+
+
+                // Update status and progress
+                if (conversionStatus === 'uploading' || conversionStatus === 'converting') {
+                    if (currentProgressBarContainer) currentProgressBarContainer.classList.remove('hidden');
+                    if (currentProgressBar) currentProgressBar.style.width = `${progress}%`;
+                    if (currentStatusMessageElement) {
+                        currentStatusMessageElement.className = 'text-center mt-6 text-xl font-medium text-gray-300';
+                        currentStatusMessageElement.innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-loader-2 animate-spin mr-3 w-6 h-6 align-middle"></svg> ${t(`status${conversionStatus.charAt(0).toUpperCase() + conversionStatus.slice(1)}`, lang)}`;
+                    }
+                    if (currentConvertBtn) currentConvertBtn.disabled = true;
+                    if (currentLoadingSpinner) currentLoadingSpinner.classList.remove('hidden');
+
+
+                } else if (conversionStatus === 'success') {
+                    if (currentProgressBarContainer) currentProgressBarContainer.classList.remove('hidden');
+                    if (currentProgressBar) currentProgressBar.style.width = '100%';
+                    if (currentStatusMessageElement) {
+                        currentStatusMessageElement.className = 'text-center mt-6 text-xl font-medium text-green-500';
+                        currentStatusMessageElement.innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-check-circle inline-block mr-2 w-6 h-6 align-middle"><circle cx="12" cy="12" r="10"/><path d="m9 12 2 2 4-4"/></svg> ${t('statusSuccess', lang)}`;
+                    }
+                    if (currentConvertBtn) currentConvertBtn.classList.add('hidden');
+                    if (currentDownloadBtn) currentDownloadBtn.classList.remove('hidden');
+                    if (currentEditBtn) currentEditBtn.classList.remove('hidden');
+                    if (currentSummarizeBtn) currentSummarizeBtn.classList.remove('hidden');
+                    if (currentConvertBtn) currentConvertBtn.disabled = false;
+                    if (currentLoadingSpinner) currentLoadingSpinner.classList.add('hidden');
+                    convertedFileReady = true;
+
+                    // Show download edited button in editing section
+                    if (downloadEditedContainer) downloadEditedContainer.classList.remove('hidden');
+
+
+                } else if (conversionStatus === 'error') {
+                    if (currentProgressBarContainer) currentProgressBarContainer.classList.add('hidden');
+                    if (currentProgressBar) currentProgressBar.style.width = '0%';
+                    if (currentStatusMessageElement) {
+                        currentStatusMessageElement.className = 'text-center mt-6 text-xl font-medium text-red-500';
+                        currentStatusMessageElement.innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-x-circle inline-block mr-2 w-6 h-6 align-middle"><circle cx="12" cy="12" r="10"/><path d="m15 9-6 6m0-6 6 6"/></svg> ${currentStatusMessageElement.innerText || t('statusError', lang)}`;
+                    }
+                    if (currentConvertBtn) currentConvertBtn.disabled = false;
+                    if (currentLoadingSpinner) currentLoadingSpinner.classList.add('hidden');
+                    convertedFileReady = false;
+                    if (downloadEditedContainer) downloadEditedContainer.classList.add('hidden');
+                    if (currentSummarizeBtn) currentSummarizeBtn.classList.add('hidden');
+
+
+                } else if (conversionStatus === 'ready') {
+                    if (currentProgressBarContainer) currentProgressBarContainer.classList.add('hidden');
+                    if (currentProgressBar) currentProgressBar.style.width = '0%';
+                    if (currentStatusMessageElement) {
+                        currentStatusMessageElement.innerText = t('statusReady', lang);
+                        currentStatusMessageElement.className = 'text-center mt-6 text-xl font-medium text-gray-300';
+                    }
+                    if (currentConvertBtn) currentConvertBtn.classList.remove('hidden');
+                    if (currentDownloadBtn) currentDownloadBtn.classList.add('hidden');
+                    if (currentEditBtn) currentEditBtn.classList.add('hidden');
+                    if (currentSummarizeBtn) currentSummarizeBtn.classList.add('hidden');
+                    if (currentConvertBtn) currentConvertBtn.disabled = false;
+                    if (currentLoadingSpinner) currentLoadingSpinner.classList.add('hidden');
+                    convertedFileReady = false;
+                    if (downloadEditedContainer) downloadEditedContainer.classList.add('hidden');
+                }
+            } else {
+                 // No file selected, hide conversion areas and reset status
+                if (digitalConversionArea) digitalConversionArea.classList.add('hidden');
+                if (imageConversionArea) imageConversionArea.classList.add('hidden');
+                if (digitalProgressBarContainer) digitalProgressBarContainer.classList.add('hidden');
+                if (imageProgressBarContainer) imageProgressBarContainer.classList.add('hidden');
+                if (digitalStatusMessage) digitalStatusMessage.innerText = '';
+                if (imageStatusMessage) imageStatusMessage.innerText = '';
+                if (digitalSelectedFile) digitalSelectedFile.innerText = '';
+                if (imageSelectedFile) imageSelectedFile.innerText = '';
+                conversionStatus = 'ready';
+                progress = 0;
+                convertedFileReady = false;
+                if (downloadEditedContainer) downloadEditedContainer.classList.add('hidden');
+                if (digitalSummarizeBtn) digitalSummarizeBtn.classList.add('hidden');
+                if (imageSummarizeBtn) imageSummarizeBtn.classList.add('hidden');
+
+                 // Redraw canvas placeholder
+                 const canvas = document.getElementById('editing-canvas');
+                 if (canvas) {
+                     const ctx = canvas.getContext('2d');
+                     ctx.clearRect(0, 0, canvas.width, canvas.height);
+                     ctx.fillStyle = '#6b7280';
+                     ctx.font = '16px Inter, sans-serif';
+                     ctx.textAlign = 'center';
+                     ctx.fillText(t('editingPlaceholder', currentLanguage), canvas.width / 2, canvas.height / 2);
+                 }
+            }
+        };
+
+
+        // Handle file selection
+        const handleFileChange = (event) => {
+            const file = event.target.files?.[0];
+            const type = intendedConversionType; // Use the intended type captured by click/drop
+
+            if (file && file.type === 'application/pdf') {
+                selectedFile = file;
+                conversionType = type; // Set the conversion type based on which dropzone was used
+                conversionStatus = 'ready';
+                progress = 0;
+                convertedFileReady = false;
+                 // Clear canvas and show placeholder
+                const canvas = document.getElementById('editing-canvas');
+                if (canvas) {
+                    const ctx = canvas.getContext('2d');
+                    ctx.clearRect(0, 0, canvas.width, canvas.height);
+                    ctx.fillStyle = '#6b7280'; // gray-500
+                    ctx.font = '16px Inter, sans-serif';
+                    ctx.textAlign = 'center';
+                    ctx.fillText(t('editingPlaceholder', currentLanguage), canvas.width / 2, canvas.height / 2);
+                }
+                updateUI(); // Update UI after state changes
+            } else {
+                selectedFile = null;
+                conversionType = null; // Reset type if invalid file
+                conversionStatus = 'noFile';
+                progress = 0;
+                convertedFileReady = false;
+                alert(t('statusNoFile', currentLanguage)); // Or a more specific error message
+                updateUI(); // Update UI after state changes
+            }
+             intendedConversionType = null; // Reset intended type after handling the file
+        };
+
+        // Handle drag over
+        const handleDragOver = (event, dropzoneElement) => {
+            event.preventDefault();
+            event.stopPropagation();
+            dropzoneElement.classList.add('hover');
+        };
+
+        // Handle drag leave
+        const handleDragLeave = (event, dropzoneElement) => {
+            event.preventDefault();
+            event.stopPropagation();
+            dropzoneElement.classList.remove('hover');
+        };
+
+        // Handle file drop
+        const handleDrop = (event, type, dropzoneElement) => {
+            event.preventDefault();
+            event.stopPropagation();
+            dropzoneElement.classList.remove('hover');
+
+            const files = event.dataTransfer.files;
+            if (files.length > 0) {
+                intendedConversionType = type; // Set intended type BEFORE triggering file change
+                fileInput.files = files;
+                fileInput.dispatchEvent(new Event('change', { bubbles: true })); // Trigger change event
+            }
+        };
+
+        // Handle conversion (Actual backend call)
+        const handleConvert = () => {
+            if (!selectedFile || !conversionType) {
+                alert(t('statusNoFile', currentLanguage));
+                return;
+            }
+
+            // Determine the correct endpoint based on conversionType
+            const endpoint = conversionType === 'digital'
+                ? '/convert_digital'
+                : '/convert_image_ocr';
+
+            conversionStatus = 'uploading';
+            progress = 0;
+            convertedFileReady = false;
+            updateUI();
+
+            const formData = new FormData();
+            formData.append('pdf_file', selectedFile); // 'pdf_file' must match the backend field name
+
+            const xhr = new XMLHttpRequest();
+            xhr.open('POST', endpoint, true); // Use the determined endpoint
+
+            // Track upload progress
+            xhr.upload.addEventListener('progress', (event) => {
+                if (event.lengthComputable) {
+                    // Upload is the first phase, let's say it goes up to 50%
+                    progress = (event.loaded / event.total) * 50;
+                    conversionStatus = 'uploading';
+                    updateUI();
+                }
+            });
+
+            // Handle response
+            xhr.addEventListener('load', () => {
+                if (xhr.status === 200) {
+                    // Success
+                    conversionStatus = 'success';
+                    progress = 100;
+                    convertedFileReady = true;
+                    updateUI(); // Final UI update for success
+
+                    // Trigger file download
+                    const blob = xhr.response;
+                    const downloadUrl = URL.createObjectURL(blob);
+                    const a = document.createElement('a');
+                    a.href = downloadUrl;
+                    // Try to get filename from headers, fallback to selected file name + .docx
+                    const contentDisposition = xhr.getResponseHeader('Content-Disposition');
+                    let filename = selectedFile.name.replace(/\.pdf$/i, ''); // Start with original name without extension
+                     filename += conversionType === 'digital' ? '_converted.docx' : '_ocr.docx'; // Add specific suffix and extension
+
+                    if (contentDisposition) {
+                        const filenameMatch = contentDisposition.match(/filename="(.+)"/);
+                        if (filenameMatch && filenameMatch[1]) {
+                            filename = filenameMatch[1];
+                        }
+                    }
+                    a.download = filename;
+                    document.body.appendChild(a);
+                    a.click();
+                    document.body.removeChild(a);
+                    URL.revokeObjectURL(downloadUrl); // Clean up
+
+                    // Simulate drawing on canvas (placeholder) - indicate success or show preview
+                    const canvas = document.getElementById('editing-canvas');
+                    if (canvas) {
+                       const ctx = canvas.getContext('2d');
+                       ctx.clearRect(0, 0, canvas.width, canvas.height);
+                       ctx.fillStyle = '#10b981'; // green-500
+                       ctx.font = '24px Inter, sans-serif';
+                       ctx.textAlign = 'center';
+                       ctx.fillText(
+                           conversionType === 'digital'
+                               ? "Digital Conversion Preview"
+                               : "OCR Conversion Preview",
+                           canvas.width / 2,
+                           canvas.height / 2 - 20
+                       );
+                       ctx.font = '16px Inter, sans-serif';
+                       ctx.fillText("Editing features go here!", canvas.width / 2, canvas.height / 2 + 10);
+                     }
+
+
+                } else {
+                    // Error: Handle non-200 status codes
+                    conversionStatus = 'error';
+                    progress = 0;
+                    convertedFileReady = false;
+                    updateUI(); // Update UI to show error state (red color, icon)
+
+                    const statusElement = conversionType === 'digital'
+                        ? digitalStatusMessage
+                        : imageStatusMessage;
+
+                    // Read the error response text from the blob
+                    const reader = new FileReader();
+                    reader.onload = function() {
+                        const errorText = reader.result || t('Conversion failed. Please try again.', currentLanguage);
+                        statusElement.innerHTML = `
+                            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"
+                                fill="none" stroke="currentColor" stroke-width="2"
+                                class="lucide lucide-x-circle inline-block mr-2 w-6 h-6 align-middle">
+                                <circle cx="12" cy="12" r="10"/>
+                                <path d="m15 9-6 6m0-6 6 6"/>
+                            </svg>
+                            ${errorText}
+                        `;
+                    };
+                    reader.onerror = function() {
+                         // Fallback if reading the blob fails
+                        statusElement.innerHTML = `
+                             <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"
+                                 fill="none" stroke="currentColor" stroke-width="2"
+                                 class="lucide lucide-x-circle inline-block mr-2 w-6 h-6 align-middle">
+                                 <circle cx="12" cy="12" r="10"/>
+                                 <path d="m15 9-6 6m0-6 6 6"/>
+                             </svg>
+                             ${t('Conversion failed. Could not read error message.', currentLanguage)}
+                         `;
+                    };
+                    // Start reading the response blob as text
+                    if (xhr.response) {
+                        reader.readAsText(xhr.response);
+                    } else {
+                         // Handle cases where there is no response body
+                         statusElement.innerHTML = `
+                             <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"
+                                 fill="none" stroke="currentColor" stroke-width="2"
+                                 class="lucide lucide-x-circle inline-block mr-2 w-6 h-6 align-middle">
+                                 <circle cx="12" cy="12" r="10"/>
+                                 <path d="m15 9-6 6m0-6 6 6"/>
+                             </svg>
+                             ${t('Conversion failed with status code', currentLanguage)} ${xhr.status}.
+                         `;
+                    }
+                }
+            });
+
+            // Handle network errors
+            xhr.addEventListener('error', () => {
+                conversionStatus = 'error';
+                progress = 0;
+                convertedFileReady = false;
+                updateUI();
+                const statusElement = conversionType === 'digital'
+                    ? digitalStatusMessage
+                    : imageStatusMessage;
+                statusElement.innerHTML = `
+                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"
+                        fill="none" stroke="currentColor" stroke-width="2"
+                        class="lucide lucide-x-circle inline-block mr-2 w-6 h-6 align-middle">
+                        <circle cx="12" cy="12" r="10"/>
+                        <path d="m15 9-6 6m0-6 6 6"/>
+                    </svg>
+                    ${t('Network error. Please try again.', currentLanguage)}
+                `;
+            });
+
+             // Handle request abort
+             xhr.addEventListener('abort', () => {
+                 conversionStatus = 'error'; // Treat abort as an error
+                 progress = 0;
+                 convertedFileReady = false;
+                 updateUI();
+                  const statusElement = conversionType === 'digital' ? digitalStatusMessage : imageStatusMessage;
+                  statusElement.innerHTML = `
+                      <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"
+                          fill="none" stroke="currentColor" stroke-width="2"
+                          class="lucide lucide-x-circle inline-block mr-2 w-6 h-6 align-middle">
+                          <circle cx="12" cy="12" r="10"/>
+                          <path d="m15 9-6 6m0-6 6 6"/>
+                      </svg>
+                      ${t('Conversion aborted.', currentLanguage)}
+                  `;
+             });
+
+
+            // Set response type to blob to handle binary data (the .docx file)
+            xhr.responseType = 'blob';
+
+            // Send the request
+            xhr.send(formData);
+        };
+
+        // Handle download converted file (actual download is triggered in XHR load listener)
+        // This function is primarily for clarity or if you implemented download differently
+        const handleDownloadConverted = () => {
+             if (conversionStatus === 'success' && convertedFileReady) {
+                // The download was already triggered automatically in the XHR load handler.
+                // If you need to allow re-downloading without another conversion, you'd need
+                // to store the downloaded blob/URL client-side or have a separate backend endpoint
+                // to serve the converted file by ID.
+                // For this implementation, we can inform the user or do nothing.
+                 alert(t('Download should have started automatically. Please check your downloads folder.', currentLanguage));
+             } else {
+                 alert(t('Conversion not complete or failed.', currentLanguage));
+             }
+        };
+
+
+        // Handle download edited document (simulated)
+         const handleDownloadEdited = () => {
+              alert(t('Simulating download of the edited file. The online editor functionality is a preview.', currentLanguage)); // Use alert for simulation
+         };
+
+
+        // Handle click on "Edit Online"
+        const handleEditOnline = () => {
+             if (conversionStatus === 'success' && convertedFileReady) {
+                scrollToSection('editing'); // Smooth scroll
+             } else {
+                 alert(t('Conversion not complete or failed.', currentLanguage));
+             }
+        };
+
+        // Handle summarize document with Gemini API
+        const handleSummarize = async () => {
+            if (!selectedFile || !convertedFileReady) {
+                alert(t('Conversion not complete or failed.', currentLanguage));
+                return;
+            }
+
+            // Show modal and loading spinner
+            if (summaryModal) summaryModal.classList.remove('hidden');
+            if (summaryModalContent) {
+                summaryModalContent.innerHTML = `
+                    <div class="flex justify-center items-center h-full min-h-[10rem]">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-loader-2 animate-spin text-purple-400"></svg>
+                        <p class="ml-3 text-lg text-gray-400">${t('summaryLoading', currentLanguage)}</p>
+                    </div>
+                `;
+            }
+
+            try {
+                // Simulate fetching content (in a real app, you'd send the converted document's text to backend)
+                const simulatedDocumentContent = `
+                    This is a placeholder for the converted document content.
+                    It discusses the advancements in artificial intelligence,
+                    specifically focusing on natural language processing models.
+                    The document highlights the capabilities of large language models
+                    in tasks such as text generation, summarization, and translation.
+                    It also touches upon the ethical considerations and potential biases
+                    in AI systems, emphasizing the need for responsible AI development.
+                    Future trends include multimodal AI and more efficient model architectures.
+                `;
+
+                const prompt = `Summarize the following document content concisely in ${currentLanguage === 'zh' ? 'Chinese' : 'English'}:\n\n${simulatedDocumentContent}`;
+
+                let chatHistory = [];
+                chatHistory.push({ role: "user", parts: [{ text: prompt }] });
+                const payload = { contents: chatHistory };
+                const apiKey = ""; // Canvas will automatically provide this
+                const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${apiKey}`;
+
+                const response = await fetch(apiUrl, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload)
+                });
+
+                const result = await response.json();
+
+                if (result.candidates && result.candidates.length > 0 &&
+                    result.candidates[0].content && result.candidates[0].content.parts &&
+                    result.candidates[0].content.parts.length > 0) {
+                    const summaryText = result.candidates[0].content.parts[0].text;
+                    if (summaryModalContent) summaryModalContent.innerHTML = `<p>${summaryText}</p>`;
+                } else {
+                    if (summaryModalContent) summaryModalContent.innerHTML = `<p class="text-red-400">${t('summaryError', currentLanguage)}: ${result.error?.message || 'Unknown error.'}</p>`;
+                }
+            } catch (error) {
+                console.error("Gemini API call failed:", error);
+                if (summaryModalContent) summaryModalContent.innerHTML = `<p class="text-red-400">${t('summaryError', currentLanguage)}: ${error.message}</p>`;
+            }
+        };
+
+
+        // Event Listeners
+        document.addEventListener('DOMContentLoaded', () => {
+            // Initial UI update to set default language text
+            updateTextContent(currentLanguage);
+            lucide.createIcons(); // Initialize Lucide icons
+
+
+             // Initialize canvas placeholder
+            const canvas = document.getElementById('editing-canvas');
+            if (canvas) {
+                 const ctx = canvas.getContext('2d');
+                 // Set initial size based on parent width
+                 canvas.width = canvas.parentElement.clientWidth;
+                 canvas.height = 400; // Example height, adjust as needed
+                 ctx.fillStyle = '#6b7280'; // gray-500
+                 ctx.font = '16px Inter, sans-serif';
+                 ctx.textAlign = 'center';
+                 ctx.fillText(t('editingPlaceholder', currentLanguage), canvas.width / 2, canvas.height / 2);
+
+                 // Optional: Adjust canvas size on window resize
+                 window.addEventListener('resize', () => {
+                     canvas.width = canvas.parentElement.clientWidth;
+                     // Redraw content after resize - you would need to handle complex redrawing
+                     // For the placeholder, just redraw it.
+                     const ctx = canvas.getContext('2d');
+                     ctx.clearRect(0, 0, canvas.width, canvas.height);
+                     ctx.fillStyle = '#6b7280';
+                     ctx.font = '16px Inter, sans-serif';
+                     ctx.textAlign = 'center';
+                     ctx.fillText(t('editingPlaceholder', currentLanguage), canvas.width / 2, canvas.height / 2);
+                 });
+            }
+
+
+            // Language select change listener
+            languageSelect.addEventListener('change', (e) => {
+                currentLanguage = e.target.value;
+                updateTextContent(currentLanguage);
+                 // Redraw canvas placeholder text on language change
+                 const canvas = document.getElementById('editing-canvas');
+                 if (canvas) {
+                     const ctx = canvas.getContext('2d');
+                     ctx.clearRect(0, 0, canvas.width, canvas.height);
+                     ctx.fillStyle = '#6b7280'; // gray-500
+                     ctx.font = '16px Inter, sans-serif';
+                     ctx.textAlign = 'center';
+                     ctx.fillText(t('editingPlaceholder', currentLanguage), canvas.width / 2, canvas.height / 2);
+                 }
+            });
+
+            // File input change listener
+            fileInput.addEventListener('change', handleFileChange);
+
+            // Dropzone event listeners for Digital PDF
+            digitalDropzone.addEventListener('dragover', (e) => handleDragOver(e, digitalDropzone));
+            digitalDropzone.addEventListener('dragleave', (e) => handleDragLeave(e, digitalDropzone));
+            digitalDropzone.addEventListener('drop', (e) => handleDrop(e, 'digital', digitalDropzone));
+            digitalDropzone.addEventListener('click', () => {
+                 intendedConversionType = 'digital'; // Set intended type on click
+                 fileInput.click();
+            });
+
+             // Dropzone event listeners for Image PDF
+            imageDropzone.addEventListener('dragover', (e) => handleDragOver(e, imageDropzone));
+            imageDropzone.addEventListener('dragleave', (e) => handleDragLeave(e, imageDropzone));
+            imageDropzone.addEventListener('drop', (e) => handleDrop(e, 'image', imageDropzone));
+            imageDropzone.addEventListener('click', () => {
+                 intendedConversionType = 'image'; // Set intended type on click
+                 fileInput.click();
+            });
+
+
+            // Convert button listeners (delegated based on conversionType)
+            digitalConvertBtn.addEventListener('click', handleConvert);
+            imageConvertBtn.addEventListener('click', handleConvert);
+
+
+            // Download converted button listeners (delegated based on conversionType)
+            digitalDownloadConvertedBtn.addEventListener('click', handleDownloadConverted);
+            imageDownloadConvertedBtn.addEventListener('click', handleDownloadConverted);
+
+             // Edit Online button listeners (delegated based on conversionType)
+            digitalEditOnlineBtn.addEventListener('click', handleEditOnline);
+            imageEditOnlineBtn.addEventListener('click', handleEditOnline);
+
+             // Download Edited button listener
+             downloadEditedBtn.addEventListener('click', handleDownloadEdited);
+
+             // New section button listeners (scroll to the correct converter section)
+            startDigitalBtn.addEventListener('click', () => scrollToSection('digital-converter'));
+            startImageBtn.addEventListener('click', () => scrollToSection('image-converter'));
+
+
+            // Smooth scroll for hero buttons
+            document.getElementById('hero-digital-btn').addEventListener('click', () => scrollToSection('digital-converter'));
+            document.getElementById('hero-image-btn').addEventListener('click', () => scrollToSection('image-converter'));
+
+            // Add click handlers for pricing buttons to scroll to upload sections
+            document.getElementById('pricing-free-btn').addEventListener('click', () => scrollToSection('digital-converter')); // Free trial might default to digital or offer a choice
+             // Add similar handlers for pricing-pro-btn and pricing-count-btn if needed to direct users
+
+            // Gemini API related event listeners
+            digitalSummarizeBtn.addEventListener('click', handleSummarize);
+            imageSummarizeBtn.addEventListener('click', handleSummarize);
+            if (summaryModalCloseBtn) { // Add null check for summaryModalCloseBtn
+                summaryModalCloseBtn.addEventListener('click', () => {
+                    if (summaryModal) summaryModal.classList.add('hidden'); // Add null check for summaryModal
+                });
+            }
+
+
+            // Initialize UI state
+            updateUI();
+        });
+
+        // Re-initialize Lucide icons after potential DOM changes (though unlikely with this structure)
+        // Consider calling this after any dynamic content loading if applicable
+        // lucide.createIcons(); // Called on DOMContentLoaded
+
+    </script>
+
+</body>
+</html>
